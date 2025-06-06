@@ -1,0 +1,279 @@
+{
+  "frames": {
+    "doctor_3.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 432,
+        "h": 750
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 432,
+        "h": 750
+      },
+      "sourceSize": {
+        "w": 432,
+        "h": 750
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "doctor_1.png": {
+      "frame": {
+        "x": 0,
+        "y": 750,
+        "w": 450,
+        "h": 738
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 450,
+        "h": 738
+      },
+      "sourceSize": {
+        "w": 450,
+        "h": 738
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "doctor_2.png": {
+      "frame": {
+        "x": 432,
+        "y": 0,
+        "w": 495.5,
+        "h": 723
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 495.5,
+        "h": 723
+      },
+      "sourceSize": {
+        "w": 495.5,
+        "h": 723
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "vaccine.png": {
+      "frame": {
+        "x": 0,
+        "y": 1488,
+        "w": 368,
+        "h": 408
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 368,
+        "h": 408
+      },
+      "sourceSize": {
+        "w": 368,
+        "h": 408
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "vaccine-lower-part.png": {
+      "frame": {
+        "x": 0,
+        "y": 1896,
+        "w": 210.5,
+        "h": 196.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 210.5,
+        "h": 196.5
+      },
+      "sourceSize": {
+        "w": 210.5,
+        "h": 196.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_1.png": {
+      "frame": {
+        "x": 210.5,
+        "y": 1896,
+        "w": 129,
+        "h": 96.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 129,
+        "h": 96.5
+      },
+      "sourceSize": {
+        "w": 129,
+        "h": 96.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_2.png": {
+      "frame": {
+        "x": 210.5,
+        "y": 1992.5,
+        "w": 81.5,
+        "h": 82.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 81.5,
+        "h": 82.5
+      },
+      "sourceSize": {
+        "w": 81.5,
+        "h": 82.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fragment__vaccine_1.png": {
+      "frame": {
+        "x": 210.5,
+        "y": 2075,
+        "w": 38,
+        "h": 38.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 38.5
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 38.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fragment__vaccine_2.png": {
+      "frame": {
+        "x": 248.5,
+        "y": 2075,
+        "w": 38,
+        "h": 38.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 38,
+        "h": 38.5
+      },
+      "sourceSize": {
+        "w": 38,
+        "h": 38.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_3.png": {
+      "frame": {
+        "x": 292,
+        "y": 1992.5,
+        "w": 58.5,
+        "h": 60.5
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 58.5,
+        "h": 60.5
+      },
+      "sourceSize": {
+        "w": 58.5,
+        "h": 60.5
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "vaccine-top-part.png": {
+      "frame": {
+        "x": 368,
+        "y": 1488,
+        "w": 229,
+        "h": 266
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 229,
+        "h": 266
+      },
+      "sourceSize": {
+        "w": 229,
+        "h": 266
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "obstacles.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 928,
+      "h": 2114
+    },
+    "scale": 0.5
+  }
+}
