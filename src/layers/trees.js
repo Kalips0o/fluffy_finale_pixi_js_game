@@ -46,11 +46,11 @@ export class Trees {
 
         const tileWidth = Math.ceil(texture.width);
         const overlap = 10;
-        const numTiles = Math.ceil(this.app.screen.width / (tileWidth - overlap)) + 1;
+        const numTiles = Math.ceil(this.app.screen.width / (tileWidth - overlap)) + 2;
 
         for (let i = 0; i < numTiles; i++) {
             const crowns = new PIXI.Sprite(texture);
-            crowns.x = i * (tileWidth - overlap);
+            crowns.x = Math.round(i * (tileWidth - overlap));
             crowns.y = 0;
             crowns.anchor.set(0, 0);
             container.addChild(crowns);
@@ -60,39 +60,28 @@ export class Trees {
 
     updatePosition(camera) {
         const worldX = camera.currentX;
-        const screenWidth = this.app.screen.width;
 
         // Обновляем позиции крон
         this.sprites.crowns.forEach((sprite, index) => {
             const tileWidth = sprite.width;
             const overlap = 10;
-            const baseX = index * (tileWidth - overlap);
-            const offset = Math.floor(worldX / (tileWidth - overlap)) * (tileWidth - overlap);
-            sprite.x = baseX - offset;
-
-            // Если спрайт ушел за левую границу, перемещаем его вправо
-            if (sprite.x < -tileWidth) {
-                sprite.x += tileWidth * this.sprites.crowns.length;
-            }
-            // Если спрайт ушел за правую границу, перемещаем его влево
-            else if (sprite.x > screenWidth) {
-                sprite.x -= tileWidth * this.sprites.crowns.length;
-            }
+            const startIndex = Math.floor(worldX / (tileWidth - overlap));
+            sprite.x = Math.round((startIndex + index) * (tileWidth - overlap));
         });
 
         // Обновляем позиции стволов
         this.sprites.trunks.forEach((sprite, index) => {
-            const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth + Math.floor(index / 2) * screenWidth;
-            const offset = Math.floor(worldX / screenWidth) * screenWidth;
+            const baseX = (index % 2 === 0 ? 0.3 : 0.7) * this.app.screen.width + Math.floor(index / 2) * this.app.screen.width;
+            const offset = Math.floor(worldX / this.app.screen.width) * this.app.screen.width;
             sprite.x = baseX - offset;
 
             // Если ствол ушел за левую границу, перемещаем его вправо
             if (sprite.x < -sprite.width) {
-                sprite.x += screenWidth * 2;
+                sprite.x += this.app.screen.width * 2;
             }
             // Если ствол ушел за правую границу, перемещаем его влево
-            else if (sprite.x > screenWidth) {
-                sprite.x -= screenWidth * 2;
+            else if (sprite.x > this.app.screen.width) {
+                sprite.x -= this.app.screen.width * 2;
             }
         });
     }

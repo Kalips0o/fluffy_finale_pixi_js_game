@@ -44,6 +44,11 @@ export class SceneManager {
             this.camera.update();
             this.updateWorldPosition();
         });
+
+        // Добавляем обработчик изменения размера окна
+        window.addEventListener('resize', () => {
+            this.drawScene();
+        });
     }
 
     initializeLayers() {
@@ -111,5 +116,10 @@ export class SceneManager {
         if (!this.rabbit.sprite.parent) {
             this.worldContainer.addChild(this.rabbit.sprite);
         }
+    }
+
+    // Добавляем метод для принудительной перерисовки сцены
+    redrawScene() {
+        this.drawScene();
     }
 }

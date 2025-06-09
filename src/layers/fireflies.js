@@ -10,9 +10,12 @@ export class Fireflies {
     }
 
     draw(container) {
+        // Очищаем предыдущих светлячков
+        this.cleanup();
+        
         this.container = container;
         const types = ['firefly_1.png', 'firefly_2.png', 'firefly_3.png', 'firefly_4.png', 'firefly_5.png'];
-        const count = 40;
+        const count = 40; // Количество светлячков на один экран
         const screenWidth = this.app.screen.width;
 
         // Создаем светлячков для двух экранов
@@ -31,6 +34,22 @@ export class Fireflies {
         this.setupAnimation();
     }
 
+    cleanup() {
+        // Удаляем всех существующих светлячков
+        this.firefliesInfo.forEach(info => {
+            if (info.sprite && info.sprite.parent) {
+                info.sprite.parent.removeChild(info.sprite);
+                info.sprite.destroy();
+            }
+        });
+        this.firefliesInfo = [];
+        
+        // Очищаем анимацию
+        if (this.app.ticker) {
+            this.app.ticker.remove(this.animationFunction);
+        }
+    }
+
     createFirefly(texture, baseX) {
         const firefly = new PIXI.Sprite(texture);
 
@@ -40,7 +59,7 @@ export class Fireflies {
         const maxY = grassY + 200; // Добавляем область ниже травы
         firefly.y = minY + Math.random() * (maxY - minY);
         
-        // Распределяем по всей ширине экрана
+        // Распределяем по ширине экрана
         firefly.x = baseX + Math.random() * this.app.screen.width;
         
         firefly.anchor.set(0.5);
@@ -85,11 +104,13 @@ export class Fireflies {
     }
 
     setupAnimation() {
-        this.app.ticker.add(() => {
+        this.time = 0;
+        this.animationFunction = (delta) => {
             this.time += 0.002;
+
             this.firefliesInfo.forEach(info => {
                 // Основное движение по кругу
-                info.sprite.x = info.baseX + Math.cos(info.angle) * info.radius;
+                info.sprite.x = info.startX + Math.cos(info.angle) * info.radius;
                 info.sprite.y = info.startY + Math.sin(info.angle) * info.radius;
                 info.angle += info.angleSpeed;
 
@@ -116,17 +137,19 @@ export class Fireflies {
                     Math.sin((hue + 240) * Math.PI / 180) * 0.5 + 0.5
                 ]);
             });
-        });
+        };
+
+        this.app.ticker.add(this.animationFunction);
     }
 
     updatePosition(camera) {
         const worldX = camera.currentX;
         const screenWidth = this.app.screen.width;
 
-        this.firefliesInfo.forEach(info => {
-            const baseX = info.baseX;
-            const offset = Math.floor(worldX / screenWidth) * screenWidth;
-            info.baseX = baseX - offset;
+        // Обновляем позиции всех светлячков
+        this.firefliesInfo.forEach((info, index) => {
+            const startIndex = Math.floor(worldX / screenWidth);
+            info.startX = (startIndex + Math.floor(index / 40)) * screenWidth + (info.baseX % screenWidth);
         });
     }
 }

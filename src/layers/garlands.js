@@ -62,10 +62,12 @@ export class Garlands {
         const worldX = camera.currentX;
         const screenWidth = this.app.screen.width;
 
+        // Обновляем позиции всех гирлянд
         this.sprites.forEach((sprite, index) => {
-            const baseX = (index % 8) * (screenWidth / 8) + Math.floor(index / 8) * screenWidth;
-            const offset = Math.floor(worldX / screenWidth) * screenWidth;
-            sprite.x = baseX - offset;
+            const tileWidth = screenWidth;
+            const overlap = 0;
+            const startIndex = Math.floor(worldX / (tileWidth - overlap));
+            sprite.x = Math.round((startIndex + index) * (tileWidth - overlap));
         });
     }
 }
