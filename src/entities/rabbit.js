@@ -9,122 +9,147 @@ export class Rabbit {
         this.currentAnimation = null;
         this.speed = 5;
         this.isMoving = false;
-        this.direction = 1; // 1 for right, -1 for left
+        this.direction = 1;
         this.isJumping = false;
-        this.jumpPower = -40; // Возвращаем прежнюю силу прыжка
-        this.gravity = 0.6; // Возвращаем прежнюю гравитацию
+        this.isHitting = false;
+        this.hitJumpPower = -15;
+        this.jumpPower = -40;
+        this.gravity = 0.6;
         this.jumpVelocity = 0;
-        this.jumpDistance = 0;
         this.initialJumpX = 0;
-        this.maxJumpDistance = 200; // Максимальное расстояние прыжка
-        this.animationSpeed = 1.4; // Возвращаем прежнюю скорость анимации
-        this.jumpAnimationSpeed = 2.0; // Делаем анимацию прыжка значительно медленнее
+        this.animationSpeed = 1.4;
+        this.hitAnimationSpeed = 0.5;
+
+        this.hitFrameDuration = 80;
+        this.hitPauseFrame = 3;
+        this.hitPauseDuration = 800;
         this.animationFrame = 0;
         this.animationTime = 0;
+
+        // Добавим хитбокс для удара
+        this.hitArea = new PIXI.Rectangle();
+        this.hitActive = false;
+
         this.setupAnimations();
         this.createSprite();
         this.setupControls();
     }
 
     setupAnimations() {
-        // Создаем анимации из спрайтов
-        const runFrames = [
-            'run_rabbit_1.png',
-            'run_rabbit_2.png',
-            'run_rabbit_3.png',
-            'run_rabbit_4.png'
-        ];
+        const runFrames = ['run_rabbit_1.png', 'run_rabbit_2.png', 'run_rabbit_3.png', 'run_rabbit_4.png'];
+        const idleFrames = ['rabbit_is_standing_1.png', 'rabbit_is_standing_2.png'];
+        const jumpFrames = ['bunny_jumping_1.png', 'bunny_jumping_2.png', 'bunny_jumping_3.png', 'bunny_jumping_4.png'];
+        const hitFrames = ['bunny_jumping_1.png', 'bunny_hits_1.png', 'bunny_hits_3.png', 'bunny_hits_4.png'];
 
-        // Добавляем кадры для стоящего кролика
-        const idleFrames = [
-            'rabbit_is_standing_1.png',
-            'rabbit_is_standing_2.png'
-        ];
-
-        // Добавляем кадры для прыжка
-        const jumpFrames = [
-            'bunny_jumping_1.png',
-            'bunny_jumping_2.png',
-            'bunny_jumping_3.png',
-            'bunny_jumping_4.png'
-        ];
-
-        this.animations.run = runFrames.map(frame => this.resources.textures[frame]);
-        this.animations.idle = idleFrames.map(frame => this.resources.textures[frame]);
-        this.animations.jump = jumpFrames.map(frame => this.resources.textures[frame]);
+        this.animations.run = runFrames.map(f => this.resources.textures[f]);
+        this.animations.idle = idleFrames.map(f => this.resources.textures[f]);
+        this.animations.jump = jumpFrames.map(f => this.resources.textures[f]);
+        this.animations.hit = hitFrames.map(f => this.resources.textures[f]);
     }
 
     createSprite() {
-        // Создаем спрайт зайца
         this.sprite = new PIXI.Sprite(this.animations.idle[0]);
         this.sprite.anchor.set(0.5);
-        this.sprite.scale.set(0.2); // Уменьшаем размер зайца
-
-        // Позиционируем зайца в нижней части экрана
-        const grassY = this.getGrassY();
-        this.sprite.x = this.app.screen.width / 2;
-        this.sprite.y = grassY - this.sprite.height / 2;
-
+        this.sprite.scale.set(0.2);
+        this.updateGroundPosition();
         this.app.stage.addChild(this.sprite);
     }
 
     getGrassY() {
         const desiredSoilHeight = 130;
-        const soilScale = desiredSoilHeight / this.resources.textures['soil.png'].height;
         const soilY = Math.round(this.app.screen.height - desiredSoilHeight);
-        return soilY + desiredSoilHeight - 50; // Позиционируем зайца  выше поверхности почвы
+        return soilY + desiredSoilHeight - 160;
+    }
+
+    updateGroundPosition() {
+        const groundY = this.getGrassY();
+        const scaledHeight = this.sprite.height * this.sprite.scale.y;
+        this.sprite.y = groundY - scaledHeight / 2;
     }
 
     setupControls() {
-        // Обработка нажатий клавиш
         window.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            if (e.key === 'ArrowLeft' && !this.isJumping && !this.isHitting) {
                 this.isMoving = true;
-                this.direction = e.key === 'ArrowLeft' ? -1 : 1;
-                // Отражение спрайта при повороте
-                this.sprite.scale.x = Math.abs(this.sprite.scale.x) * this.direction;
-                if (!this.isJumping) {
-                    this.playAnimation('run');
-                }
+                this.direction = -1;
+                this.sprite.scale.x = -0.2;
+                this.playAnimation('run');
             }
-            // Добавляем прыжок на пробел
-            if (e.key === ' ' && !this.isJumping) {
+            if (e.key === 'ArrowRight' && !this.isJumping && !this.isHitting) {
+                this.isMoving = true;
+                this.direction = 1;
+                this.sprite.scale.x = 0.2;
+                this.playAnimation('run');
+            }
+            if (e.key === ' ' && !this.isJumping && !this.isHitting) {
                 this.isJumping = true;
                 this.jumpVelocity = this.jumpPower;
                 this.initialJumpX = this.sprite.x;
                 this.jumpDistance = 0;
                 this.playAnimation('jump');
             }
+            if (e.key === 'у' && !this.isHitting && !this.isJumping) {
+                this.startHit();
+            }
         });
 
         window.addEventListener('keyup', (e) => {
             if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
                 this.isMoving = false;
-                if (!this.isJumping) {
+                if (!this.isJumping && !this.isHitting) {
                     this.stopAnimation();
-                    // Мгновенно переключаемся на первый кадр стояния
                     this.sprite.texture = this.animations.idle[0];
                 }
             }
         });
     }
 
+    startHit() {
+        this.isHitting = true;
+        this.hitActive = false;
+        this.jumpVelocity = this.hitJumpPower;
+        this.playAnimation('hit');
+        this.animationFrame = 0;
+        this.sprite.scale.set(0.18);
+        if (this.direction === -1) {
+            this.sprite.scale.x = -0.18;
+        }
+        this.updateGroundPosition();
+
+        this.currentAnimation = 'hit';
+
+        // Обновляем хитбокс при ударе
+        this.updateHitArea();
+    }
+
+    updateHitArea() {
+        // Хитбокс будет перед кроликом в направлении удара
+        const hitWidth = 50;
+        const hitHeight = 30;
+        const offsetX = this.direction === 1 ? 30 : -hitWidth - 30;
+
+        this.hitArea.x = this.sprite.x + offsetX;
+        this.hitArea.y = this.sprite.y - hitHeight/2;
+        this.hitArea.width = hitWidth;
+        this.hitArea.height = hitHeight;
+    }
+
     playAnimation(name) {
         if (this.currentAnimation !== name) {
-            console.log('Switching to animation:', name); // Отладочный вывод
             this.currentAnimation = name;
             this.animationFrame = 0;
             this.animationTime = 0;
             this.sprite.texture = this.animations[name][0];
+            if (name === 'idle') this.animationSpeed = 30;
+            else if (name === 'jump') this.animationSpeed = 100;
+            else if (name === 'hit') this.animationSpeed = this.hitAnimationSpeed;
+            else this.animationSpeed = 1.4;
 
-            // Устанавливаем скорость анимации в зависимости от типа
-            if (name === 'idle') {
-                this.animationSpeed = 30; // Медленная анимация для стояния
-            } else if (name === 'jump') {
-                this.animationSpeed = 100; // Очень медленная анимация для прыжка
-                console.log('Jump animation speed set to:', this.animationSpeed); // Отладочный вывод
+            // Maintain direction when changing animations
+            if (this.direction === -1) {
+                this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
             } else {
-                this.animationSpeed = 1.4; // Нормальная скорость для бега
+                this.sprite.scale.x = Math.abs(this.sprite.scale.x);
             }
         }
     }
@@ -133,70 +158,112 @@ export class Rabbit {
         this.currentAnimation = 'idle';
         this.animationFrame = 0;
         this.animationTime = 0;
-        this.animationSpeed = 30; // Медленная анимация для стояния
+        this.animationSpeed = 30;
+        this.sprite.scale.set(0.2);
+        if (this.direction === -1) {
+            this.sprite.scale.x = -0.2;
+        }
+        this.updateGroundPosition();
     }
 
     update(delta) {
-        // Обновляем позицию по горизонтали
-        if (this.isMoving && !this.isJumping) {
+        if (this.isMoving && !this.isHitting) {
             this.sprite.x += this.speed * this.direction * delta;
         }
 
-        // Обновляем позицию по вертикали (прыжок)
-        if (this.isJumping) {
-            // Обновляем вертикальную скорость и позицию
+        // Обновление физики прыжка/удара
+        if (this.isJumping || this.isHitting) {
             this.jumpVelocity += this.gravity;
             this.sprite.y += this.jumpVelocity * delta;
 
-            // Рассчитываем горизонтальное движение во время прыжка
-            // Даже если не нажаты клавиши движения, кролик движется вперед
-            const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.jumpPower);
-            const horizontalSpeed = this.speed * (1 - jumpProgress * 0.3); // Меньшее замедление в верхней точке
-            this.sprite.x += horizontalSpeed * this.direction * delta;
-            this.jumpDistance = Math.abs(this.sprite.x - this.initialJumpX);
+            if (this.isJumping) {
+                const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.jumpPower);
+                const horizontalSpeed = this.speed * (1 - jumpProgress * 0.3);
+                this.sprite.x += horizontalSpeed * this.direction * delta;
+                this.jumpDistance = Math.abs(this.sprite.x - this.initialJumpX);
+            }
 
-            // Проверяем, не выходит ли кролик за верхнюю границу экрана
+            // Проверка выхода за верхнюю границу
             if (this.sprite.y < this.sprite.height / 1.8) {
                 this.sprite.y = this.sprite.height / 1.8;
                 this.jumpVelocity = 0;
             }
 
-            // Проверяем, не приземлился ли кролик
-            const groundY = this.getGrassY() - this.sprite.height / 2;
-            if (this.sprite.y >= groundY) {
-                this.sprite.y = groundY;
-                this.isJumping = false;
+            // Проверка приземления
+            const groundY = this.getGrassY();
+            const scaledHeight = this.sprite.height * this.sprite.scale.y;
+            if (this.sprite.y >= groundY - scaledHeight / 2) {
+                this.sprite.y = groundY - scaledHeight / 2;
                 this.jumpVelocity = 0;
-                if (!this.isMoving) {
-                    this.stopAnimation();
-                    // Мгновенно переключаемся на первый кадр стояния
-                    this.sprite.texture = this.animations.idle[0];
-                } else {
-                    this.playAnimation('run');
+
+                if (this.isJumping) {
+                    this.isJumping = false;
+                    this.isHitting = false;
+                    if (this.isMoving) this.playAnimation('run');
+                    else {
+                        this.stopAnimation();
+                        this.sprite.texture = this.animations.idle[0];
+                    }
                 }
             }
         }
 
-        // Ограничиваем движение в пределах экрана по горизонтали
+        // Обновление границ экрана
         const bounds = this.sprite.getBounds();
-        if (bounds.left < 0) {
-            this.sprite.x = bounds.width / 2;
-        } else if (bounds.right > this.app.screen.width) {
-            this.sprite.x = this.app.screen.width - bounds.width / 2;
-        }
+        if (bounds.left < 0) this.sprite.x = bounds.width / 2;
+        else if (bounds.right > this.app.screen.width) this.sprite.x = this.app.screen.width - bounds.width / 2;
 
-        // Обновляем анимацию
+        // Обновление анимации
         if (this.currentAnimation) {
             this.animationTime += delta;
-            if (this.animationTime >= this.animationSpeed) {
-                this.animationTime = 0;
-                const frames = this.animations[this.currentAnimation];
-                this.animationFrame = (this.animationFrame + 1) % frames.length;
+
+            if (this.currentAnimation === 'hit') {
+                const frames = this.animations.hit;
+                const frameDuration = this.animationFrame === this.hitPauseFrame ?
+                    this.hitPauseDuration : this.hitFrameDuration;
+
+                if (this.animationTime >= frameDuration / 16.666) {
+                    this.animationTime = 0;
+                    this.animationFrame++;
+
+                    // Активируем хитбокс на определенном кадре анимации
+                    if (this.animationFrame === 2 && !this.hitActive) {
+                        this.hitActive = true;
+                        this.updateHitArea();
+                    } else if (this.animationFrame > 2) {
+                        this.hitActive = false;
+                    }
+
+                    if (this.animationFrame >= frames.length) {
+                        this.sprite.texture = frames[frames.length - 1];
+                        this.isHitting = false;
+                        this.hitActive = false;
+                        this.animationFrame = 0;
+                        if (this.isMoving) this.playAnimation('run');
+                        else {
+                            this.stopAnimation();
+                            this.sprite.texture = this.animations.idle[0];
+                        }
+                        return;
+                    }
+                }
                 this.sprite.texture = frames[this.animationFrame];
-                if (this.currentAnimation === 'jump') {
-                    console.log('Jump frame:', this.animationFrame, 'Speed:', this.animationSpeed); // Отладочный вывод
+            } else {
+                if (this.animationTime >= this.animationSpeed) {
+                    this.animationTime = 0;
+                    const frames = this.animations[this.currentAnimation];
+                    this.animationFrame = (this.animationFrame + 1) % frames.length;
+                    this.sprite.texture = frames[this.animationFrame];
                 }
             }
         }
+    }
+
+    // Метод для проверки попадания
+    checkHit(target) {
+        if (!this.hitActive) return false;
+
+        this.updateHitArea();
+        return this.hitArea.contains(target.x, target.y);
     }
 }
