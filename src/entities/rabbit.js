@@ -12,7 +12,7 @@ export class Rabbit {
         this.direction = 1;
         this.isJumping = false;
         this.isHitting = false;
-        this.hitJumpPower = -15;
+        this.hitJumpPower = -25; // Увеличили высоту прыжка при ударе
         this.jumpPower = -40;
         this.gravity = 0.6;
         this.jumpVelocity = 0;
@@ -22,17 +22,20 @@ export class Rabbit {
 
         this.hitFrameDuration = 80;
         this.hitPauseFrame = 3;
-        this.hitPauseDuration = 800;
+        this.hitPauseDuration = 700;
         this.animationFrame = 0;
         this.animationTime = 0;
+        this.hitLanding = false; // Флаг приземления после удара
 
-        // Добавим хитбокс для удара
+        // Хитбокс и эффекты
         this.hitArea = new PIXI.Rectangle();
         this.hitActive = false;
+        this.bloodEffect = null;
 
         this.setupAnimations();
         this.createSprite();
         this.setupControls();
+        this.createBloodEffect();
     }
 
     setupAnimations() {
@@ -53,6 +56,26 @@ export class Rabbit {
         this.sprite.scale.set(0.2);
         this.updateGroundPosition();
         this.app.stage.addChild(this.sprite);
+    }
+
+    createBloodEffect() {
+        this.bloodEffect = new PIXI.Sprite(this.resources.textures['bunny_hits_4.png']);
+        this.bloodEffect.anchor.set(0.5);
+        this.bloodEffect.scale.set(0.2);
+        this.bloodEffect.visible = false;
+        this.app.stage.addChild(this.bloodEffect);
+    }
+
+    showBloodEffect() {
+        this.bloodEffect.x = this.sprite.x;
+        this.bloodEffect.y = this.sprite.y + this.sprite.height/2;
+        this.bloodEffect.scale.x = Math.abs(this.bloodEffect.scale.x) * this.direction;
+        this.bloodEffect.visible = true;
+
+        // Анимация исчезновения
+        setTimeout(() => {
+            this.bloodEffect.visible = false;
+        }, 500);
     }
 
     getGrassY() {
@@ -85,7 +108,6 @@ export class Rabbit {
                 this.isJumping = true;
                 this.jumpVelocity = this.jumpPower;
                 this.initialJumpX = this.sprite.x;
-                this.jumpDistance = 0;
                 this.playAnimation('jump');
             }
             if (e.key === 'у' && !this.isHitting && !this.isJumping) {
@@ -105,25 +127,29 @@ export class Rabbit {
     }
 
     startHit() {
-        this.isHitting = true;
-        this.hitActive = false;
-        this.jumpVelocity = this.hitJumpPower;
-        this.playAnimation('hit');
-        this.animationFrame = 0;
-        this.sprite.scale.set(0.18);
-        if (this.direction === -1) {
-            this.sprite.scale.x = -0.18;
+        if (!this.isHitting && !this.isJumping) {
+            this.isHitting = true;
+            this.isJumping = true;
+            this.hitActive = false;
+            this.hitLanding = false;
+            this.jumpVelocity = this.hitJumpPower;
+            this.initialJumpX = this.sprite.x;
+            this.playAnimation('hit');
+            this.animationFrame = 0;
+            this.animationTime = 0;
+            this.sprite.scale.set(0.18);
+            if (this.direction === -1) {
+                this.sprite.scale.x = -0.18;
+            }
+            this.updateGroundPosition();
+
+            // Наклон вперед при ударе
+            this.sprite.rotation = this.direction * 0.1;
+            this.updateHitArea();
         }
-        this.updateGroundPosition();
-
-        this.currentAnimation = 'hit';
-
-        // Обновляем хитбокс при ударе
-        this.updateHitArea();
     }
 
     updateHitArea() {
-        // Хитбокс будет перед кроликом в направлении удара
         const hitWidth = 50;
         const hitHeight = 30;
         const offsetX = this.direction === 1 ? 30 : -hitWidth - 30;
@@ -145,7 +171,6 @@ export class Rabbit {
             else if (name === 'hit') this.animationSpeed = this.hitAnimationSpeed;
             else this.animationSpeed = 1.4;
 
-            // Maintain direction when changing animations
             if (this.direction === -1) {
                 this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
             } else {
@@ -163,6 +188,7 @@ export class Rabbit {
         if (this.direction === -1) {
             this.sprite.scale.x = -0.2;
         }
+        this.sprite.rotation = 0;
         this.updateGroundPosition();
     }
 
@@ -171,19 +197,16 @@ export class Rabbit {
             this.sprite.x += this.speed * this.direction * delta;
         }
 
-        // Обновление физики прыжка/удара
         if (this.isJumping || this.isHitting) {
             this.jumpVelocity += this.gravity;
             this.sprite.y += this.jumpVelocity * delta;
 
-            if (this.isJumping) {
-                const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.jumpPower);
-                const horizontalSpeed = this.speed * (1 - jumpProgress * 0.3);
-                this.sprite.x += horizontalSpeed * this.direction * delta;
-                this.jumpDistance = Math.abs(this.sprite.x - this.initialJumpX);
+            // При ударе небольшое движение вперед без перемещения по земле
+            if (this.isHitting && this.jumpVelocity < 0) {
+                this.sprite.x += this.direction * 2 * delta;
             }
 
-            // Проверка выхода за верхнюю границу
+            // Верхняя граница
             if (this.sprite.y < this.sprite.height / 1.8) {
                 this.sprite.y = this.sprite.height / 1.8;
                 this.jumpVelocity = 0;
@@ -196,11 +219,36 @@ export class Rabbit {
                 this.sprite.y = groundY - scaledHeight / 2;
                 this.jumpVelocity = 0;
 
-                if (this.isJumping) {
+                if (this.isHitting && !this.hitLanding) {
+                    this.hitLanding = true;
+                    this.showBloodEffect();
+                    this.sprite.rotation = 0;
+                    // Показываем 4-й кадр при приземлении
+                    this.sprite.texture = this.animations.hit[3];
+                    this.animationFrame = 3;
+                    this.animationTime = 0;
+
+                    setTimeout(() => {
+                        this.isHitting = false;
+                        this.isJumping = false;
+                        this.hitActive = false;
+                        this.hitLanding = false;
+                        this.animationFrame = 0;
+                        this.animationTime = 0;
+                        if (this.isMoving) {
+                            this.playAnimation('run');
+                        } else {
+                            this.stopAnimation();
+                            this.sprite.texture = this.animations.idle[0];
+                        }
+                    }, 1000); // Увеличили задержку до 1 секунды
+                }
+
+                if (this.isJumping && !this.isHitting) {
                     this.isJumping = false;
-                    this.isHitting = false;
-                    if (this.isMoving) this.playAnimation('run');
-                    else {
+                    if (this.isMoving) {
+                        this.playAnimation('run');
+                    } else {
                         this.stopAnimation();
                         this.sprite.texture = this.animations.idle[0];
                     }
@@ -208,16 +256,16 @@ export class Rabbit {
             }
         }
 
-        // Обновление границ экрана
+        // Границы экрана
         const bounds = this.sprite.getBounds();
         if (bounds.left < 0) this.sprite.x = bounds.width / 2;
         else if (bounds.right > this.app.screen.width) this.sprite.x = this.app.screen.width - bounds.width / 2;
 
-        // Обновление анимации
+        // Анимация
         if (this.currentAnimation) {
             this.animationTime += delta;
 
-            if (this.currentAnimation === 'hit') {
+            if (this.currentAnimation === 'hit' && !this.hitLanding) {
                 const frames = this.animations.hit;
                 const frameDuration = this.animationFrame === this.hitPauseFrame ?
                     this.hitPauseDuration : this.hitFrameDuration;
@@ -226,7 +274,7 @@ export class Rabbit {
                     this.animationTime = 0;
                     this.animationFrame++;
 
-                    // Активируем хитбокс на определенном кадре анимации
+                    // Активация хитбокса на 2 кадре
                     if (this.animationFrame === 2 && !this.hitActive) {
                         this.hitActive = true;
                         this.updateHitArea();
@@ -234,21 +282,13 @@ export class Rabbit {
                         this.hitActive = false;
                     }
 
-                    if (this.animationFrame >= frames.length) {
-                        this.sprite.texture = frames[frames.length - 1];
-                        this.isHitting = false;
-                        this.hitActive = false;
-                        this.animationFrame = 0;
-                        if (this.isMoving) this.playAnimation('run');
-                        else {
-                            this.stopAnimation();
-                            this.sprite.texture = this.animations.idle[0];
-                        }
-                        return;
+                    // Не показываем последний кадр до приземления
+                    if (this.animationFrame >= frames.length - 1) {
+                        this.animationFrame = frames.length - 2;
                     }
                 }
                 this.sprite.texture = frames[this.animationFrame];
-            } else {
+            } else if (this.currentAnimation !== 'hit') {
                 if (this.animationTime >= this.animationSpeed) {
                     this.animationTime = 0;
                     const frames = this.animations[this.currentAnimation];
@@ -259,10 +299,8 @@ export class Rabbit {
         }
     }
 
-    // Метод для проверки попадания
     checkHit(target) {
         if (!this.hitActive) return false;
-
         this.updateHitArea();
         return this.hitArea.contains(target.x, target.y);
     }
