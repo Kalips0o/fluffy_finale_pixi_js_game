@@ -5,10 +5,28 @@ export class RabbitEffects {
         this.rabbit = rabbit;
         this.resources = resources;
         this.bloodEffect = null;
+        this.isEffectActive = false;
+        this.effectTimeout = null;
     }
 
     setup() {
+        this.cleanup();
         this.createBloodEffect();
+    }
+
+    cleanup() {
+        if (this.bloodEffect) {
+            if (this.bloodEffect.parent) {
+                this.bloodEffect.parent.removeChild(this.bloodEffect);
+            }
+            this.bloodEffect.destroy();
+            this.bloodEffect = null;
+        }
+        if (this.effectTimeout) {
+            clearTimeout(this.effectTimeout);
+            this.effectTimeout = null;
+        }
+        this.isEffectActive = false;
     }
 
     createBloodEffect() {
@@ -20,18 +38,30 @@ export class RabbitEffects {
     }
 
     showBlood() {
+        if (this.isEffectActive) return;
+
         this.bloodEffect.x = this.rabbit.sprite.x;
         this.bloodEffect.y = this.rabbit.sprite.y + this.rabbit.sprite.height/2;
         this.bloodEffect.scale.x = Math.abs(this.bloodEffect.scale.x) * this.rabbit.direction;
         this.bloodEffect.scale.set(0.12);
         this.bloodEffect.visible = true;
+        this.isEffectActive = true;
 
-        setTimeout(() => {
+        if (this.effectTimeout) {
+            clearTimeout(this.effectTimeout);
+        }
+
+        this.effectTimeout = setTimeout(() => {
             this.bloodEffect.visible = false;
+            this.isEffectActive = false;
+            this.effectTimeout = null;
         }, 500);
     }
 
     update() {
-        // Можно добавить обновление других эффектов
+        if (this.bloodEffect && this.bloodEffect.visible) {
+            this.bloodEffect.x = this.rabbit.sprite.x;
+            this.bloodEffect.y = this.rabbit.sprite.y + this.rabbit.sprite.height/2;
+        }
     }
 }

@@ -5,9 +5,10 @@ import { RabbitPhysics } from './rabbit-physics';
 import { RabbitEffects } from './rabbit-effects';
 
 export class Rabbit {
-    constructor(app, resources) {
+    constructor(app, resources, sceneManager) {
         this.app = app;
         this.resources = resources;
+        this.sceneManager = sceneManager;
 
         // Подкомпоненты
         this.animations = new RabbitAnimations(this, resources);
@@ -35,7 +36,6 @@ export class Rabbit {
         this.sprite.anchor.set(0.5);
         this.sprite.scale.set(0.15);
         this.physics.updateGroundPosition();
-        this.app.stage.addChild(this.sprite);
     }
 
     update(delta) {

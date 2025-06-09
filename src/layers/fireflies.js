@@ -6,28 +6,32 @@ export class Fireflies {
         this.resources = resources;
         this.firefliesInfo = [];
         this.time = 0;
+        this.container = null;
     }
 
-    draw() {
-        const container = new PIXI.Container();
+    draw(container) {
+        this.container = container;
         const types = ['firefly_1.png', 'firefly_2.png', 'firefly_3.png', 'firefly_4.png', 'firefly_5.png'];
         const count = 40;
+        const screenWidth = this.app.screen.width;
 
-        for (let i = 0; i < count; i++) {
-            const type = types[Math.floor(Math.random() * types.length)];
-            const texture = this.resources.textures[type];
-            if (!texture) continue;
+        // Создаем светлячков для двух экранов
+        for (let screen = 0; screen < 2; screen++) {
+            for (let i = 0; i < count; i++) {
+                const type = types[Math.floor(Math.random() * types.length)];
+                const texture = this.resources.textures[type];
+                if (!texture) continue;
 
-            const firefly = this.createFirefly(texture);
-            container.addChild(firefly.sprite);
-            this.firefliesInfo.push(firefly.info);
+                const firefly = this.createFirefly(texture, screen * screenWidth);
+                container.addChild(firefly.sprite);
+                this.firefliesInfo.push(firefly.info);
+            }
         }
 
-        this.app.stage.addChild(container);
         this.setupAnimation();
     }
 
-    createFirefly(texture) {
+    createFirefly(texture, baseX) {
         const firefly = new PIXI.Sprite(texture);
 
         // Распределяем светлячков по всей высоте экрана
@@ -37,7 +41,7 @@ export class Fireflies {
         firefly.y = minY + Math.random() * (maxY - minY);
         
         // Распределяем по всей ширине экрана
-        firefly.x = Math.random() * this.app.screen.width;
+        firefly.x = baseX + Math.random() * this.app.screen.width;
         
         firefly.anchor.set(0.5);
         firefly.alpha = 1;
@@ -58,16 +62,17 @@ export class Fireflies {
                 angleSpeed: 0.001 + Math.random() * 0.002,
                 glowSpeed: 0.1 + Math.random() * 0.15,
                 glowOffset: Math.random() * Math.PI * 2,
-                radius: 15 + Math.random() * 30, // Увеличиваем радиус движения
+                radius: 15 + Math.random() * 30,
                 verticalSpeed: 0.01 + Math.random() * 0.015,
                 verticalOffset: Math.random() * Math.PI * 2,
-                secondaryRadius: 8 + Math.random() * 12, // Увеличиваем вторичный радиус
+                secondaryRadius: 8 + Math.random() * 12,
                 secondarySpeed: 0.015 + Math.random() * 0.02,
                 secondaryOffset: Math.random() * Math.PI * 2,
                 tertiarySpeed: 0.008 + Math.random() * 0.012,
                 tertiaryOffset: Math.random() * Math.PI * 2,
                 colorSpeed: 0.2 + Math.random() * 0.3,
-                colorOffset: Math.random() * Math.PI * 2
+                colorOffset: Math.random() * Math.PI * 2,
+                baseX: firefly.x
             }
         };
     }
@@ -84,7 +89,7 @@ export class Fireflies {
             this.time += 0.002;
             this.firefliesInfo.forEach(info => {
                 // Основное движение по кругу
-                info.sprite.x = info.startX + Math.cos(info.angle) * info.radius;
+                info.sprite.x = info.baseX + Math.cos(info.angle) * info.radius;
                 info.sprite.y = info.startY + Math.sin(info.angle) * info.radius;
                 info.angle += info.angleSpeed;
 
@@ -110,13 +115,18 @@ export class Fireflies {
                     Math.sin((hue + 120) * Math.PI / 180) * 0.5 + 0.5,
                     Math.sin((hue + 240) * Math.PI / 180) * 0.5 + 0.5
                 ]);
-
-                // Если светлячок выходит за пределы экрана, возвращаем его
-                if (info.sprite.x < -50) info.sprite.x = this.app.screen.width + 50;
-                if (info.sprite.x > this.app.screen.width + 50) info.sprite.x = -50;
-                if (info.sprite.y < -50) info.sprite.y = this.app.screen.height + 50;
-                if (info.sprite.y > this.app.screen.height + 50) info.sprite.y = -50;
             });
+        });
+    }
+
+    updatePosition(camera) {
+        const worldX = camera.currentX;
+        const screenWidth = this.app.screen.width;
+
+        this.firefliesInfo.forEach(info => {
+            const baseX = info.baseX;
+            const offset = Math.floor(worldX / screenWidth) * screenWidth;
+            info.baseX = baseX - offset;
         });
     }
 }

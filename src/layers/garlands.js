@@ -4,6 +4,7 @@ export class Garlands {
         this.app = app;
         this.resources = resources;
         this.isBackLayer = isBackLayer;
+        this.sprites = [];
         this.garlandTypes = [
             'garland_spider_1.png',
             'garland_spider_long_1.png',
@@ -16,27 +17,29 @@ export class Garlands {
         ];
     }
 
-    draw() {
-        const container = new PIXI.Container();
+    draw(container) {
         const numGarlands = 8;
         const baseScale = 0.12;
+        const screenWidth = this.app.screen.width;
 
-        for (let i = 0; i < numGarlands; i++) {
-            const type = this.garlandTypes[Math.floor(Math.random() * this.garlandTypes.length)];
-            const texture = this.resources.textures[type];
-            if (!texture) continue;
+        // Создаем гирлянды для двух экранов
+        for (let screen = 0; screen < 2; screen++) {
+            for (let i = 0; i < numGarlands; i++) {
+                const type = this.garlandTypes[Math.floor(Math.random() * this.garlandTypes.length)];
+                const texture = this.resources.textures[type];
+                if (!texture) continue;
 
-            const garland = this.createGarland(texture, type, baseScale);
-            container.addChild(garland);
+                const garland = this.createGarland(texture, type, baseScale, screen * screenWidth);
+                container.addChild(garland);
+                this.sprites.push(garland);
+            }
         }
-
-        this.app.stage.addChild(container);
     }
 
-    createGarland(texture, type, baseScale) {
+    createGarland(texture, type, baseScale, baseX) {
         const garland = new PIXI.Sprite(texture);
 
-        const x = Math.random() * this.app.screen.width;
+        const x = baseX + Math.random() * this.app.screen.width;
         let y, scale;
 
         if (this.isBackLayer) {
@@ -53,5 +56,16 @@ export class Garlands {
         garland.scale.set(scale);
 
         return garland;
+    }
+
+    updatePosition(camera) {
+        const worldX = camera.currentX;
+        const screenWidth = this.app.screen.width;
+
+        this.sprites.forEach((sprite, index) => {
+            const baseX = (index % 8) * (screenWidth / 8) + Math.floor(index / 8) * screenWidth;
+            const offset = Math.floor(worldX / screenWidth) * screenWidth;
+            sprite.x = baseX - offset;
+        });
     }
 }

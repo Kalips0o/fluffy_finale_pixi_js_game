@@ -60,7 +60,19 @@ export class RabbitPhysics {
 
     updateMovement(delta) {
         if (this.rabbit.isMoving && !this.isHitting) {
-            this.rabbit.sprite.x += this.speed * this.rabbit.direction * delta;
+            const newX = this.rabbit.sprite.x + this.speed * this.rabbit.direction * delta;
+
+            // Проверяем границы движения
+            if (this.rabbit.direction === 1) {
+                // Движение вправо - не ограничиваем
+                this.rabbit.sprite.x = newX;
+            } else {
+                // Движение влево - ограничиваем стартовой позицией
+                const worldX = this.rabbit.sceneManager.camera.getWorldPosition(newX);
+                if (worldX >= this.rabbit.sceneManager.rabbitStartX) {
+                    this.rabbit.sprite.x = newX;
+                }
+            }
         }
     }
 
@@ -74,7 +86,19 @@ export class RabbitPhysics {
                 const forwardSpeed = this.isHitting ? 5 : 3;
                 const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(jumpPower);
                 const speed = forwardSpeed * (1 - jumpProgress * 0.5);
-                this.rabbit.sprite.x += speed * this.rabbit.direction * delta;
+                const newX = this.rabbit.sprite.x + speed * this.rabbit.direction * delta;
+
+                // Проверяем границы движения при прыжке
+                if (this.rabbit.direction === 1) {
+                    // Движение вправо - не ограничиваем
+                    this.rabbit.sprite.x = newX;
+                } else {
+                    // Движение влево - ограничиваем стартовой позицией
+                    const worldX = this.rabbit.sceneManager.camera.getWorldPosition(newX);
+                    if (worldX >= this.rabbit.sceneManager.rabbitStartX) {
+                        this.rabbit.sprite.x = newX;
+                    }
+                }
             }
 
             if (this.rabbit.sprite.y < this.rabbit.sprite.height / 1.8) {
@@ -135,10 +159,12 @@ export class RabbitPhysics {
     }
 
     handleBounds() {
+        const worldX = this.rabbit.sceneManager.camera.getWorldPosition(this.rabbit.sprite.x);
         const bounds = this.rabbit.sprite.getBounds();
-        if (bounds.left < 0) this.rabbit.sprite.x = bounds.width / 2;
-        else if (bounds.right > this.rabbit.app.screen.width) {
-            this.rabbit.sprite.x = this.rabbit.app.screen.width - bounds.width / 2;
+
+        // Проверяем только левую границу (стартовая позиция)
+        if (worldX < this.rabbit.sceneManager.rabbitStartX) {
+            this.rabbit.sprite.x = this.rabbit.sceneManager.camera.getScreenPosition(this.rabbit.sceneManager.rabbitStartX);
         }
     }
 }

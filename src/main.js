@@ -8,8 +8,11 @@ const app = setupApp();
 
 // Загрузка ассетов и создание сцены
 loadAssets().then((resources) => {
+    // Создаем менеджер сцены
     const sceneManager = new SceneManager(app, resources);
-    sceneManager.drawScene();
-
-    window.addEventListener('resize', () => sceneManager.drawScene());
+    
+    // Обработчик изменения размера окна
+    window.addEventListener('resize', () => {
+        sceneManager.drawScene();
+    });
 });

@@ -4,9 +4,10 @@ export class Foliage {
         this.app = app;
         this.resources = resources;
         this.textureName = textureName;
+        this.sprites = [];
     }
 
-    draw() {
+    draw(container) {
         const texture = this.resources.textures[this.textureName];
         if (!texture) return;
 
@@ -14,18 +15,29 @@ export class Foliage {
         const scale = desiredHeight ? desiredHeight / texture.height : 1;
         const tileWidth = Math.ceil(texture.width * scale);
         const overlap = 5;
+        const numTiles = Math.ceil(this.app.screen.width / (tileWidth - overlap)) + 1;
 
-        let x = 0;
-        const y = 0;
-
-        while (x < this.app.screen.width + tileWidth) {
+        for (let i = 0; i < numTiles; i++) {
             const foliage = new PIXI.Sprite(texture);
-            foliage.x = Math.round(x);
-            foliage.y = y;
+            foliage.x = i * (tileWidth - overlap);
+            foliage.y = 0;
             foliage.anchor.set(0, 0);
             foliage.scale.set(scale);
-            this.app.stage.addChild(foliage);
-            x += tileWidth - overlap;
+            container.addChild(foliage);
+            this.sprites.push(foliage);
         }
+    }
+
+    updatePosition(camera) {
+        const worldX = camera.currentX;
+        const screenWidth = this.app.screen.width;
+
+        this.sprites.forEach((sprite, index) => {
+            const tileWidth = sprite.width;
+            const overlap = 5;
+            const baseX = index * (tileWidth - overlap);
+            const offset = Math.floor(worldX / (tileWidth - overlap)) * (tileWidth - overlap);
+            sprite.x = baseX - offset;
+        });
     }
 }
