@@ -4,7 +4,7 @@ import { Garlands } from './layers/garlands';
 import { Fireflies } from './layers/fireflies';
 import { Ground } from './layers/ground';
 import { Trees } from './layers/trees';
-import { Rabbit } from './entities/rabbit';
+import { Rabbit } from './entities/rabbit/rabbit';
 
 export class SceneManager {
     constructor(app, resources) {
@@ -45,7 +45,7 @@ export class SceneManager {
         this.layers.trees.draw();
         this.layers.frontGarlands.draw();
         this.layers.topFoliage.draw();
-        
+
         // Добавляем зайца поверх всех слоев
         this.app.stage.addChild(this.rabbit.sprite);
     }
