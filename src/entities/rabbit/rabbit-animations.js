@@ -36,18 +36,17 @@ export class RabbitAnimations {
     }
 
     play(name) {
-        if (this.currentAnimation !== name) {
-            this.currentAnimation = name;
-            this.animationFrame = 0;
-            this.animationTime = 0;
-            this.rabbit.sprite.texture = this.getFrame(name, 0);
+        if (this.currentAnimation === name) return; // Prevent restarting the same animation
+        this.currentAnimation = name;
+        this.animationFrame = 0;
+        this.animationTime = 0;
+        this.rabbit.sprite.texture = this.getFrame(name, 0);
 
-            // Обновляем масштаб и направление
-            const scale = name === 'hit' ? 0.13 : 0.15;
-            this.rabbit.sprite.scale.set(scale);
-            if (this.rabbit.direction === -1) {
-                this.rabbit.sprite.scale.x = -scale;
-            }
+        // Обновляем масштаб и направление
+        const scale = name === 'hit' ? 0.13 : 0.15;
+        this.rabbit.sprite.scale.set(scale);
+        if (this.rabbit.direction === -1) {
+            this.rabbit.sprite.scale.x = -scale;
         }
     }
 
@@ -95,8 +94,11 @@ export class RabbitAnimations {
                 this.rabbit.physics.hitActive = false;
             }
 
-            if (this.animationFrame >= this.animations.hit.length - 1) {
-                this.animationFrame = this.animations.hit.length - 2;
+            // Prevent animation from continuing if hit landing has occurred
+            if (this.rabbit.physics.hitLanding) {
+                this.animationFrame = 3;
+                this.rabbit.sprite.texture = this.getFrame('hit', 3);
+                return;
             }
         }
         this.rabbit.sprite.texture = this.animations.hit[this.animationFrame];

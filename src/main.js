@@ -11,8 +11,8 @@ loadAssets().then((resources) => {
     // Создаем менеджер сцены
     const sceneManager = new SceneManager(app, resources);
     
-    // Обработчик изменения размера окна
-    window.addEventListener('resize', () => {
-        sceneManager.drawScene();
-    });
+    // Обработчик изменения размера окна (перенесен в SceneManager)
+    // window.addEventListener('resize', () => {
+    //     sceneManager.drawScene();
+    // });
 });

@@ -5,6 +5,7 @@ export async function loadAssets() {
         // Загружаем все необходимые ресурсы
         const worldAssets = await PIXI.Assets.load('src/img/WorldAssets-hd.json');
         const rabbitAssets = await PIXI.Assets.load('src/img/rabbit.json');
+        const obstaclesAssets = await PIXI.Assets.load('src/img/obstacles.json');
         
         // Проверяем, что все необходимые текстуры загружены
         const requiredTextures = [
@@ -29,15 +30,37 @@ export async function loadAssets() {
             'firefly_2.png',
             'firefly_3.png',
             'firefly_4.png',
-            'firefly_5.png'
+            'firefly_5.png',
+            'doctor_1.png'
         ];
+
+        // Создаем текстуры из спрайт-листов
+        const textures = {};
+        
+        // Добавляем текстуры из WorldAssets
+        if (worldAssets.textures) {
+            Object.entries(worldAssets.textures).forEach(([key, texture]) => {
+                textures[key] = texture;
+            });
+        }
+
+        // Добавляем текстуры из rabbitAssets
+        if (rabbitAssets.textures) {
+            Object.entries(rabbitAssets.textures).forEach(([key, texture]) => {
+                textures[key] = texture;
+            });
+        }
+
+        // Добавляем текстуры из obstaclesAssets
+        if (obstaclesAssets.textures) {
+            Object.entries(obstaclesAssets.textures).forEach(([key, texture]) => {
+                textures[key] = texture;
+            });
+        }
 
         // Объединяем ресурсы
         const resources = {
-            textures: {
-                ...worldAssets.textures,
-                ...rabbitAssets.textures
-            }
+            textures: textures
         };
 
         // Проверяем наличие всех текстур

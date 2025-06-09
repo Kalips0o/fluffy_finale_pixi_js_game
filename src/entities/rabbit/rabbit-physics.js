@@ -48,6 +48,7 @@ export class RabbitPhysics {
     }
 
     startHit() {
+        if (this.isHitting) return; // Prevent multiple hits
         this.isHitting = true;
         this.isJumping = true;
         this.hitActive = false;
@@ -129,12 +130,18 @@ export class RabbitPhysics {
     }
 
     handleHitLanding() {
+        if (this.hitLanding) return; // Prevent multiple landings
         this.hitLanding = true;
         this.rabbit.effects.showBlood();
         this.rabbit.sprite.rotation = 0;
         this.rabbit.sprite.texture = this.rabbit.animations.getFrame('hit', 3);
 
-        setTimeout(() => {
+        // Clear any existing timeout
+        if (this.hitTimeout) {
+            clearTimeout(this.hitTimeout);
+        }
+
+        this.hitTimeout = setTimeout(() => {
             this.isHitting = false;
             this.isJumping = false;
             this.hitActive = false;

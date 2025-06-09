@@ -30,7 +30,7 @@ export class RabbitEffects {
     }
 
     createBloodEffect() {
-        this.bloodEffect = new PIXI.Sprite(this.resources.textures['bunny_hits_4.png']);
+        this.bloodEffect = new PIXI.Sprite(PIXI.Texture.EMPTY);
         this.bloodEffect.anchor.set(0.5);
         this.bloodEffect.scale.set(0.15);
         this.bloodEffect.visible = false;

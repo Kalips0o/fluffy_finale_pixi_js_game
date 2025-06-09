@@ -7,6 +7,7 @@ import { Ground } from './layers/ground';
 import { Trees } from './layers/trees';
 import { Rabbit } from './entities/rabbit/rabbit';
 import { Camera } from './camera';
+import { DoctorManager } from './entities/doctor/doctor-manager';
 
 export class SceneManager {
     constructor(app, resources) {
@@ -24,7 +25,19 @@ export class SceneManager {
 
         // Создаем зайца
         this.rabbit = new Rabbit(app, resources, this);
+        this.worldContainer.addChild(this.rabbit.sprite);
         this.camera.setTarget(this.rabbit);
+
+        // Создаем менеджер докторов
+        this.doctorManager = new DoctorManager(app, resources, this);
+        this.doctorManager.init();
+        if (this.doctorManager) {
+            this.doctorManager.doctors.forEach(doctor => {
+                if (doctor.isActive) {
+                    this.worldContainer.addChild(doctor.sprite);
+                }
+            });
+        }
 
         // Устанавливаем начальную позицию кролика (200 пикселей от левого края)
         this.rabbitStartX = 200;
@@ -42,7 +55,9 @@ export class SceneManager {
         this.app.ticker.add((delta) => {
             this.rabbit.update(delta);
             this.camera.update();
+            this.doctorManager.update(delta);
             this.updateWorldPosition();
+            this.updateSpriteZOrder();
         });
 
         // Добавляем обработчик изменения размера окна
@@ -98,10 +113,16 @@ export class SceneManager {
     }
 
     drawScene() {
-        // Очищаем контейнер мира
-        this.worldContainer.removeChildren();
+        // Очищаем и перерисовываем только слои. Кролик и доктора остаются в worldContainer.
+        // Для этого нужно, чтобы каждый слой имел метод 'cleanup' или чтобы их спрайты не добавлялись повторно.
+        // Если слои рисуют свои спрайты каждый раз, то нужно удалить старые.
+        // Проверим, имеют ли слои метод 'clear' или 'removeChildren' для своих внутренних спрайтов.
 
-        // Порядок отрисовки важен!
+        // Временно, чтобы решить проблему с дублированием, будем очищать все слои
+        // и перерисовывать их, но оставим кролика и докторов.
+        // Нам нужно убедиться, что слои могут корректно удалять свои предыдущие отрисовки.
+        
+        // Обновляем слои
         this.layers.background.draw(this.worldContainer);
         this.layers.backFoliage.draw(this.worldContainer);
         this.layers.backGarlands.draw(this.worldContainer);
@@ -112,14 +133,43 @@ export class SceneManager {
         this.layers.frontGarlands.draw(this.worldContainer);
         this.layers.topFoliage.draw(this.worldContainer);
 
-        // Добавляем зайца в контейнер только если он еще не добавлен
-        if (!this.rabbit.sprite.parent) {
-            this.worldContainer.addChild(this.rabbit.sprite);
+        // Кролик и доктора уже добавлены в worldContainer и не удаляются.
+        // Их порядок отрисовки относительно слоев будет определяться порядком добавления в worldContainer.
+        // Если нужно, чтобы они были поверх всех слоев, их нужно добавлять после всех слоев.
+        // Так как они были добавлены в конструкторе, они могут быть под какими-то слоями.
+        // Лучше всего их переместить наверх, если они должны быть всегда поверх.
+        if (this.doctorManager) {
+            this.doctorManager.doctors.forEach(doctor => {
+                if (doctor.isActive) {
+                    this.worldContainer.setChildIndex(doctor.sprite, this.worldContainer.children.length - 1);
+                }
+            });
         }
+        this.worldContainer.setChildIndex(this.rabbit.sprite, this.worldContainer.children.length - 1); // Перемещаем кролика на самый верхний слой
     }
 
     // Добавляем метод для принудительной перерисовки сцены
     redrawScene() {
         this.drawScene();
+    }
+
+    // Новый метод для управления z-порядком спрайтов
+    updateSpriteZOrder() {
+        // Убедимся, что доктора добавлены в worldContainer, а затем установим их z-индекс.
+        // Это важно, потому что новые доктора появляются в каждом кадре в DoctorManager.update
+        // и добавляются в worldContainer в этот момент.
+        // Нам нужно заново установить позицию кролика после добавления новых докторов.
+        if (this.doctorManager) {
+            this.doctorManager.doctors.forEach(doctor => {
+                if (doctor.isActive && doctor.sprite && doctor.sprite.parent === this.worldContainer) {
+                    // Ставим доктора перед кроликом, но не на самый верх
+                    this.worldContainer.setChildIndex(doctor.sprite, this.worldContainer.children.length - 2);
+                }
+            });
+        }
+        // Всегда помещаем кролика на самый верхний слой
+        if (this.rabbit && this.rabbit.sprite && this.rabbit.sprite.parent === this.worldContainer) {
+            this.worldContainer.setChildIndex(this.rabbit.sprite, this.worldContainer.children.length - 1);
+        }
     }
 }
