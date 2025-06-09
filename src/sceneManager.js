@@ -4,6 +4,7 @@ import { Garlands } from './layers/garlands';
 import { Fireflies } from './layers/fireflies';
 import { Ground } from './layers/ground';
 import { Trees } from './layers/trees';
+import { Rabbit } from './entities/rabbit';
 
 export class SceneManager {
     constructor(app, resources) {
@@ -21,6 +22,14 @@ export class SceneManager {
             frontGarlands: new Garlands(app, resources, false),
             topFoliage: new Foliage(app, resources, 'foliage.png')
         };
+
+        // Создаем зайца
+        this.rabbit = new Rabbit(app, resources);
+
+        // Добавляем обновление состояния зайца в игровой цикл
+        this.app.ticker.add((delta) => {
+            this.rabbit.update(delta);
+        });
     }
 
     drawScene() {
@@ -36,5 +45,8 @@ export class SceneManager {
         this.layers.trees.draw();
         this.layers.frontGarlands.draw();
         this.layers.topFoliage.draw();
+        
+        // Добавляем зайца поверх всех слоев
+        this.app.stage.addChild(this.rabbit.sprite);
     }
 }
