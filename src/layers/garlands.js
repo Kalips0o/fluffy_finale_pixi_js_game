@@ -62,12 +62,29 @@ export class Garlands {
         const worldX = camera.currentX;
         const screenWidth = this.app.screen.width;
 
-        // Обновляем позиции всех гирлянд
+        // Проверяем, нужно ли обновить позиции гирлянд
+        this.checkAndUpdateGarlands(worldX, screenWidth);
+    }
+
+    checkAndUpdateGarlands(worldX, screenWidth) {
+        // Определяем текущий индекс экрана
+        const currentScreenIndex = Math.floor(worldX / screenWidth);
+        
+        // Проверяем каждую гирлянду
         this.sprites.forEach((sprite, index) => {
-            const tileWidth = screenWidth;
-            const overlap = 0;
-            const startIndex = Math.floor(worldX / (tileWidth - overlap));
-            sprite.x = Math.round((startIndex + index) * (tileWidth - overlap));
+            const garlandScreenIndex = Math.floor(sprite.x / screenWidth);
+            
+            // Если гирлянда находится на экране, который мы уже прошли
+            if (garlandScreenIndex < currentScreenIndex) {
+                // Перемещаем её на два экрана вперед
+                const newScreenIndex = currentScreenIndex + 1;
+                sprite.x = newScreenIndex * screenWidth + (sprite.x % screenWidth);
+            }
+            // Если гирлянда находится на экране, который мы еще не достигли
+            else if (garlandScreenIndex > currentScreenIndex + 1) {
+                // Перемещаем её на текущий экран
+                sprite.x = currentScreenIndex * screenWidth + (sprite.x % screenWidth);
+            }
         });
     }
 }

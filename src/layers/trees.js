@@ -22,10 +22,10 @@ export class Trees {
 
         // Создаем несколько деревьев для бесконечной прокрутки
         const positions = [
-            { x: this.app.screen.width * 0.3, y: grassY + 150 },
-            { x: this.app.screen.width * 0.7, y: grassY + 140 },
-            { x: this.app.screen.width * 1.3, y: grassY + 145 },
-            { x: this.app.screen.width * 1.7, y: grassY + 155 }
+            { x: this.app.screen.width * 0.3, y: grassY + 150, scale: 1.0 },
+            { x: this.app.screen.width * 0.7, y: grassY + 140, scale: 1.2 },
+            { x: this.app.screen.width * 1.3, y: grassY + 145, scale: 1.0 },
+            { x: this.app.screen.width * 1.7, y: grassY + 155, scale: 1.2 }
         ];
 
         positions.forEach((pos, index) => {
@@ -34,7 +34,7 @@ export class Trees {
             trunk.x = Math.round(pos.x);
             trunk.y = Math.round(pos.y);
             trunk.anchor.set(0.5, 1);
-            trunk.scale.set(1);
+            trunk.scale.set(pos.scale);
             container.addChild(trunk);
             this.sprites.trunks.push(trunk);
         });
@@ -69,19 +69,30 @@ export class Trees {
             sprite.x = Math.round((startIndex + index) * (tileWidth - overlap));
         });
 
-        // Обновляем позиции стволов
-        this.sprites.trunks.forEach((sprite, index) => {
-            const baseX = (index % 2 === 0 ? 0.3 : 0.7) * this.app.screen.width + Math.floor(index / 2) * this.app.screen.width;
-            const offset = Math.floor(worldX / this.app.screen.width) * this.app.screen.width;
-            sprite.x = baseX - offset;
+        // Проверяем и обновляем позиции стволов
+        this.checkAndUpdateTrunks(worldX);
+    }
 
-            // Если ствол ушел за левую границу, перемещаем его вправо
-            if (sprite.x < -sprite.width) {
-                sprite.x += this.app.screen.width * 2;
+    checkAndUpdateTrunks(worldX) {
+        const screenWidth = this.app.screen.width;
+        const currentScreenIndex = Math.floor(worldX / screenWidth);
+
+        // Проверяем каждый ствол
+        this.sprites.trunks.forEach((sprite, index) => {
+            const trunkScreenIndex = Math.floor(sprite.x / screenWidth);
+            
+            // Если ствол находится на экране, который мы уже прошли
+            if (trunkScreenIndex < currentScreenIndex) {
+                // Перемещаем его на два экрана вперед
+                const newScreenIndex = currentScreenIndex + 1;
+                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
+                sprite.x = newScreenIndex * screenWidth + baseX;
             }
-            // Если ствол ушел за правую границу, перемещаем его влево
-            else if (sprite.x > this.app.screen.width) {
-                sprite.x -= this.app.screen.width * 2;
+            // Если ствол находится на экране, который мы еще не достигли
+            else if (trunkScreenIndex > currentScreenIndex + 1) {
+                // Перемещаем его на текущий экран
+                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
+                sprite.x = currentScreenIndex * screenWidth + baseX;
             }
         });
     }

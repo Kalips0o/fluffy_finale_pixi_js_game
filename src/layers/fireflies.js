@@ -146,10 +146,29 @@ export class Fireflies {
         const worldX = camera.currentX;
         const screenWidth = this.app.screen.width;
 
-        // Обновляем позиции всех светлячков
+        // Проверяем, нужно ли обновить позиции светлячков
+        this.checkAndUpdateFireflies(worldX, screenWidth);
+    }
+
+    checkAndUpdateFireflies(worldX, screenWidth) {
+        // Определяем текущий индекс экрана
+        const currentScreenIndex = Math.floor(worldX / screenWidth);
+        
+        // Проверяем каждый светлячок
         this.firefliesInfo.forEach((info, index) => {
-            const startIndex = Math.floor(worldX / screenWidth);
-            info.startX = (startIndex + Math.floor(index / 40)) * screenWidth + (info.baseX % screenWidth);
+            const fireflyScreenIndex = Math.floor(info.startX / screenWidth);
+            
+            // Если светлячок находится на экране, который мы уже прошли
+            if (fireflyScreenIndex < currentScreenIndex) {
+                // Перемещаем его на два экрана вперед
+                const newScreenIndex = currentScreenIndex + 1;
+                info.startX = newScreenIndex * screenWidth + (info.baseX % screenWidth);
+            }
+            // Если светлячок находится на экране, который мы еще не достигли
+            else if (fireflyScreenIndex > currentScreenIndex + 1) {
+                // Перемещаем его на текущий экран
+                info.startX = currentScreenIndex * screenWidth + (info.baseX % screenWidth);
+            }
         });
     }
 }
