@@ -16,7 +16,6 @@ export class Rabbit {
         this.jumpPower = -40;
         this.gravity = 0.6;
         this.jumpVelocity = 0;
-        this.initialJumpX = 0;
         this.animationSpeed = 1.4;
         this.hitAnimationSpeed = 0.5;
 
@@ -70,6 +69,7 @@ export class Rabbit {
         this.bloodEffect.x = this.sprite.x;
         this.bloodEffect.y = this.sprite.y + this.sprite.height/2;
         this.bloodEffect.scale.x = Math.abs(this.bloodEffect.scale.x) * this.direction;
+        this.bloodEffect.scale.set(0.16);
         this.bloodEffect.visible = true;
 
         // Анимация исчезновения
@@ -110,7 +110,7 @@ export class Rabbit {
                 this.initialJumpX = this.sprite.x;
                 this.playAnimation('jump');
             }
-            if (e.key === 'у' && !this.isHitting && !this.isJumping) {
+            if ((e.key === 'у' || e.key === 'e') && !this.isHitting && !this.isJumping) {
                 this.startHit();
             }
         });
@@ -201,9 +201,19 @@ export class Rabbit {
             this.jumpVelocity += this.gravity;
             this.sprite.y += this.jumpVelocity * delta;
 
-            // При ударе небольшое движение вперед без перемещения по земле
-            if (this.isHitting && this.jumpVelocity < 0) {
-                this.sprite.x += this.direction * 2 * delta;
+            // Движение вперед во время прыжка
+            if (this.jumpVelocity < 0) { // Только во время подъема
+                if (this.isHitting) {
+                    // При ударе более сильное движение вперед
+                    const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.hitJumpPower);
+                    const forwardSpeed = 5 * (1 - jumpProgress * 0.5);
+                    this.sprite.x += forwardSpeed * this.direction * delta;
+                } else {
+                    // При обычном прыжке небольшое движение вперед
+                    const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.jumpPower);
+                    const forwardSpeed = 3 * (1 - jumpProgress * 0.5); // Максимальная скорость 3, меньше чем при ударе
+                    this.sprite.x += forwardSpeed * this.direction * delta;
+                }
             }
 
             // Верхняя граница
@@ -241,7 +251,7 @@ export class Rabbit {
                             this.stopAnimation();
                             this.sprite.texture = this.animations.idle[0];
                         }
-                    }, 1000); // Увеличили задержку до 1 секунды
+                    }, 700);
                 }
 
                 if (this.isJumping && !this.isHitting) {
