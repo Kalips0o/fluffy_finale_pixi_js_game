@@ -83,37 +83,53 @@ export class DoctorManager {
             // Проверяем столкновение с кроликом только если доктор активен
             if (doctor.isActive) {
                 const rabbit = this.sceneManager.rabbit;
+                const doctorHitbox = doctor.hitbox;
+                
+                // Проверяем столкновение при ударе
                 if (rabbit.physics.hitActive) {
-                    // Проверяем пересечение хитбоксов
                     const hitArea = rabbit.physics.hitArea;
-                    const doctorHitbox = doctor.hitbox;
-                    
-                    // Проверяем пересечение по всем сторонам
-                    const collision = 
+                    const hitCollision = 
                         hitArea.x < doctorHitbox.x + doctorHitbox.width &&
                         hitArea.x + hitArea.width > doctorHitbox.x &&
                         hitArea.y < doctorHitbox.y + doctorHitbox.height &&
                         hitArea.y + hitArea.height > doctorHitbox.y;
 
-                    if (collision) {
-                        console.log('Collision detected!', {
-                            hitArea: {
-                                x: hitArea.x,
-                                y: hitArea.y,
-                                width: hitArea.width,
-                                height: hitArea.height
-                            },
-                            doctorHitbox: {
-                                x: doctorHitbox.x,
-                                y: doctorHitbox.y,
-                                width: doctorHitbox.width,
-                                height: doctorHitbox.height
-                            }
-                        });
+                    if (hitCollision) {
+                        console.log('Hit collision detected!');
                         this.handleCollision(doctor);
-                        doctor.deactivate();
                         return false;
                     }
+                }
+                
+                // Проверяем обычное столкновение с более точным хитбоксом кролика
+                const rabbitX = rabbit.sprite.x;
+                const rabbitY = rabbit.sprite.y;
+                const rabbitWidth = rabbit.sprite.width * 0.4; // Уменьшаем ширину хитбокса
+                const rabbitHeight = rabbit.sprite.height * 0.6; // Уменьшаем высоту хитбокса
+                
+                const regularCollision = 
+                    rabbitX - rabbitWidth/2 < doctorHitbox.x + doctorHitbox.width &&
+                    rabbitX + rabbitWidth/2 > doctorHitbox.x &&
+                    rabbitY - rabbitHeight/2 < doctorHitbox.y + doctorHitbox.height &&
+                    rabbitY + rabbitHeight/2 > doctorHitbox.y;
+
+                if (regularCollision) {
+                    console.log('Regular collision detected!', {
+                        rabbit: {
+                            x: rabbitX,
+                            y: rabbitY,
+                            width: rabbitWidth,
+                            height: rabbitHeight
+                        },
+                        doctor: {
+                            x: doctorHitbox.x,
+                            y: doctorHitbox.y,
+                            width: doctorHitbox.width,
+                            height: doctorHitbox.height
+                        }
+                    });
+                    this.handleCollision(doctor);
+                    return false;
                 }
             }
             
@@ -122,21 +138,114 @@ export class DoctorManager {
     }
 
     handleCollision(doctor) {
-        if (!doctor.isActive) return; // Предотвращаем повторную обработку столкновения
+        const rabbit = this.sceneManager.rabbit;
         
-        // Если кролик в процессе удара (активен хитбокс), доктор исчезает
-        if (this.sceneManager.rabbit.physics.hitActive) {
-            console.log('Setting hitDoctor flag'); // Добавляем отладочный вывод
-            // Устанавливаем флаг удара по доктору
-            this.sceneManager.rabbit.physics.hitDoctor = true;
-            // Добавляем брызги крови на камеру
-            this.sceneManager.addCameraBloodSplatter();
-            // Деактивируем доктора
+        // If rabbit is hitting, deactivate the doctor and show blood splatter
+        if (rabbit.physics.hitActive) {
+            this.sceneManager.addCameraBloodSplatter(); // Add blood splatter to camera when hitting
             doctor.deactivate();
-        } else {
-            // Иначе кролик получает урон
-            this.sceneManager.rabbit.takeDamage();
+            return;
         }
+        
+        // If rabbit is just passing through, trigger game over
+        this.triggerGameOver(rabbit);
+    }
+
+    triggerGameOver(rabbit) {
+        // Stop rabbit movement
+        rabbit.physics.speed = 0;
+        rabbit.physics.isJumping = false;
+        rabbit.physics.isHitting = false;
+        rabbit.physics.gameOver = true;
+        
+        // Play falling animation sequence
+        this.playFallingAnimation(rabbit);
+    }
+
+    playFallingAnimation(rabbit) {
+        // Immediately change to falling sprite and set proper scale
+        rabbit.sprite.texture = rabbit.resources.textures['rabbit_fell_2.png'];
+        const scale = 0.15;
+        rabbit.sprite.scale.set(scale);
+        if (rabbit.direction === -1) {
+            rabbit.sprite.scale.x = -scale;
+        }
+        
+        // Start spiral falling animation
+        const startX = rabbit.sprite.x;
+        const startY = rabbit.sprite.y;
+        const direction = rabbit.direction; // Get rabbit's direction
+        const targetX = startX + (direction * 200); // Move forward in the direction rabbit was moving
+        const targetY = startY - 150; // First move up
+        const finalY = startY - 50; // Fall between grass layers
+        const startRotation = 0;
+        const targetRotation = Math.PI * 4; // Two full rotations
+        const duration = 2000; // 2 seconds for smoother animation
+        const startTime = Date.now();
+        
+        const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Smoother easing function
+            const easeProgress = 1 - Math.pow(1 - progress, 4); // Changed to power of 4 for smoother motion
+            
+            // Calculate spiral movement with smoother sine
+            const spiralProgress = Math.sin(progress * Math.PI * 3) * 40; // Reduced amplitude and frequency
+            
+            // Update position with spiral effect
+            rabbit.sprite.x = startX + (targetX - startX) * easeProgress + spiralProgress;
+            
+            // First move up, then down with smoother transition
+            if (progress < 0.4) { // Longer upward phase
+                // Moving up phase with smooth easing
+                const upProgress = progress / 0.4; // Scale to 0-1
+                const upEase = 1 - Math.pow(1 - upProgress, 2); // Quadratic easing
+                rabbit.sprite.y = startY + (targetY - startY) * upEase;
+            } else {
+                // Falling down phase with smooth easing
+                const downProgress = (progress - 0.4) / 0.6; // Scale to 0-1
+                const downEase = 1 - Math.pow(1 - downProgress, 3); // Cubic easing
+                rabbit.sprite.y = targetY + (finalY - targetY) * downEase;
+            }
+            
+            // Smoother rotation
+            rabbit.sprite.rotation = startRotation + targetRotation * easeProgress;
+            
+            // Continue animation if not finished
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // Hide rabbit completely after animation
+                rabbit.sprite.visible = false;
+                
+                // Show game over screen
+                setTimeout(() => {
+                    this.showGameOver();
+                }, 500);
+            }
+        };
+        
+        // Start animation
+        requestAnimationFrame(animate);
+    }
+
+    showGameOver() {
+        const gameOverSprite = new PIXI.Sprite(this.resources.textures['game-over.png']);
+        gameOverSprite.anchor.set(0.5);
+        gameOverSprite.x = this.app.screen.width / 2;
+        gameOverSprite.y = this.app.screen.height / 2;
+        gameOverSprite.scale.set(0.5);
+        
+        // Add to stage instead of world container so it's not affected by camera
+        this.app.stage.addChild(gameOverSprite);
+        
+        // Add click handler to restart game
+        gameOverSprite.interactive = true;
+        gameOverSprite.on('pointerdown', () => {
+            window.location.reload();
+        });
     }
 
     cleanup() {

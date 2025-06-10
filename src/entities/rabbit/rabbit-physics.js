@@ -13,6 +13,7 @@ export class RabbitPhysics {
         this.jumpVelocity = 0;
         this.hitLanding = false;
         this.hitDoctor = false;
+        this.gameOver = false;
 
         // Хитбокс
         this.hitArea = new PIXI.Rectangle();
@@ -55,6 +56,7 @@ export class RabbitPhysics {
     }
 
     startHit() {
+        if (this.isHitting || this.gameOver) return;
         if (this.isHitting) return; // Prevent multiple hits
         this.isHitting = true;
         this.isJumping = true;
@@ -86,6 +88,7 @@ export class RabbitPhysics {
     }
 
     handleJump(delta) {
+        if (this.gameOver) return;
         if (this.isJumping || this.isHitting) {
             this.jumpVelocity += this.gravity;
             this.rabbit.sprite.y += this.jumpVelocity * delta;
