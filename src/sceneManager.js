@@ -167,9 +167,17 @@ export class SceneManager {
                 }
             });
         }
+
         // Всегда помещаем кролика на самый верхний слой
         if (this.rabbit && this.rabbit.sprite && this.rabbit.sprite.parent === this.worldContainer) {
             this.worldContainer.setChildIndex(this.rabbit.sprite, this.worldContainer.children.length - 1);
+        }
+
+        // Если есть активный эффект удара, помещаем его поверх кролика
+        if (this.rabbit && this.rabbit.effects && this.rabbit.effects.hitEffect && 
+            this.rabbit.effects.hitEffect.visible && 
+            this.rabbit.effects.hitEffect.parent === this.worldContainer) {
+            this.worldContainer.setChildIndex(this.rabbit.effects.hitEffect, this.worldContainer.children.length - 1);
         }
     }
 }

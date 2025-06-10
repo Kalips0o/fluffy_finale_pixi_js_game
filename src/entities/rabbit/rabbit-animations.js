@@ -15,7 +15,7 @@ export class RabbitAnimations {
             hit: 0.5
         };
         this.hitFrameDuration = 80;
-        this.hitPauseFrame = 3;
+        this.hitPauseFrame = 2;
         this.hitPauseDuration = 700;
     }
 
@@ -23,7 +23,7 @@ export class RabbitAnimations {
         const runFrames = ['run_rabbit_1.png', 'run_rabbit_2.png', 'run_rabbit_3.png', 'run_rabbit_4.png'];
         const idleFrames = ['rabbit_is_standing_1.png', 'rabbit_is_standing_2.png'];
         const jumpFrames = ['bunny_jumping_1.png', 'bunny_jumping_2.png', 'bunny_jumping_3.png', 'bunny_jumping_4.png'];
-        const hitFrames = ['bunny_jumping_1.png', 'bunny_hits_1.png', 'bunny_hits_3.png', 'bunny_hits_4.png'];
+        const hitFrames = ['bunny_jumping_1.png', 'bunny_hits_1.png', 'bunny_hits_3.png'];
 
         this.animations.run = runFrames.map(f => this.resources.textures[f]);
         this.animations.idle = idleFrames.map(f => this.resources.textures[f]);
@@ -31,8 +31,8 @@ export class RabbitAnimations {
         this.animations.hit = hitFrames.map(f => this.resources.textures[f]);
     }
 
-    getFrame(animation, frame) {
-        return this.animations[animation][frame];
+    getFrame(name, frame) {
+        return this.animations[name][frame];
     }
 
     play(name) {
@@ -94,13 +94,23 @@ export class RabbitAnimations {
                 this.rabbit.physics.hitActive = false;
             }
 
-            // Prevent animation from continuing if hit landing has occurred
+            // Если достигли последнего кадра анимации удара
+            if (this.animationFrame >= this.animations.hit.length) {
+                this.animationFrame = this.animations.hit.length - 1;
+            }
+
+            // Если произошло приземление, показываем соответствующую текстуру
             if (this.rabbit.physics.hitLanding) {
-                this.animationFrame = 3;
-                this.rabbit.sprite.texture = this.getFrame('hit', 3);
+                if (this.rabbit.physics.hitDoctor) {
+                    this.rabbit.sprite.texture = this.resources.textures['bunny_hits_4.png'];
+                } else {
+                    this.rabbit.sprite.texture = this.resources.textures['bunny_hits_the_ground.png'];
+                }
                 return;
             }
+
+            // Показываем текущий кадр анимации
+            this.rabbit.sprite.texture = this.animations.hit[this.animationFrame];
         }
-        this.rabbit.sprite.texture = this.animations.hit[this.animationFrame];
     }
 }

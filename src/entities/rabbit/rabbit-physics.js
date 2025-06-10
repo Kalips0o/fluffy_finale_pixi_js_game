@@ -12,6 +12,7 @@ export class RabbitPhysics {
         this.gravity = 0.6;
         this.jumpVelocity = 0;
         this.hitLanding = false;
+        this.hitDoctor = false;
 
         // Хитбокс
         this.hitArea = new PIXI.Rectangle();
@@ -53,6 +54,7 @@ export class RabbitPhysics {
         this.isJumping = true;
         this.hitActive = false;
         this.hitLanding = false;
+        this.hitDoctor = false;
         this.jumpVelocity = this.hitJumpPower;
         this.rabbit.animations.play('hit');
         this.rabbit.sprite.rotation = this.rabbit.direction * 0.1;
@@ -132,9 +134,8 @@ export class RabbitPhysics {
     handleHitLanding() {
         if (this.hitLanding) return; // Prevent multiple landings
         this.hitLanding = true;
-        this.rabbit.effects.showBlood();
+        this.rabbit.effects.showGroundHit();
         this.rabbit.sprite.rotation = 0;
-        this.rabbit.sprite.texture = this.rabbit.animations.getFrame('hit', 3);
 
         // Clear any existing timeout
         if (this.hitTimeout) {
@@ -146,6 +147,7 @@ export class RabbitPhysics {
             this.isJumping = false;
             this.hitActive = false;
             this.hitLanding = false;
+            this.hitDoctor = false;
             if (this.rabbit.isMoving) {
                 this.rabbit.animations.play('run');
             } else {

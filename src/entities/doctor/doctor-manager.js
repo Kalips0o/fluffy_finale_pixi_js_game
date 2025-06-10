@@ -75,6 +75,7 @@ export class DoctorManager {
         
         // Если кролик в процессе удара (активен хитбокс), доктор исчезает
         if (this.sceneManager.rabbit.physics.hitActive) {
+            this.sceneManager.rabbit.physics.hitDoctor = true;
             doctor.deactivate();
         } else {
             // Иначе кролик получает урон
