@@ -36,7 +36,7 @@ export class DoctorManager {
         // Создаем нового доктора
         const worldX = this.sceneManager.camera.getWorldPosition(this.app.screen.width + 100);
         const grassY = this.getGrassY();
-        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 50);
+        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 50, this.sceneManager);
         
         // Добавляем доктора в контейнер мира
         this.sceneManager.worldContainer.addChild(doctor.sprite);
@@ -129,6 +129,8 @@ export class DoctorManager {
             console.log('Setting hitDoctor flag'); // Добавляем отладочный вывод
             // Устанавливаем флаг удара по доктору
             this.sceneManager.rabbit.physics.hitDoctor = true;
+            // Добавляем брызги крови на камеру
+            this.sceneManager.addCameraBloodSplatter();
             // Деактивируем доктора
             doctor.deactivate();
         } else {

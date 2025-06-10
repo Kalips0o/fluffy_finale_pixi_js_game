@@ -39,7 +39,16 @@ export class Garlands {
     createGarland(texture, type, baseScale, baseX) {
         const garland = new PIXI.Sprite(texture);
 
-        const x = baseX + Math.random() * this.app.screen.width;
+        // Calculate minimum spacing between garlands (30% of screen width)
+        const minSpacing = this.app.screen.width * 0.3;
+        
+        // Try to find a position that's not too close to existing garlands
+        let x, attempts = 0;
+        do {
+            x = baseX + Math.random() * this.app.screen.width;
+            attempts++;
+        } while (this.isTooCloseToOtherGarlands(x) && attempts < 10);
+
         let y, scale;
 
         if (this.isBackLayer) {
@@ -58,6 +67,11 @@ export class Garlands {
         return garland;
     }
 
+    isTooCloseToOtherGarlands(x) {
+        const minSpacing = this.app.screen.width * 0.3;
+        return this.sprites.some(sprite => Math.abs(sprite.x - x) < minSpacing);
+    }
+
     updatePosition(camera) {
         const worldX = camera.currentX;
         const screenWidth = this.app.screen.width;
@@ -67,25 +81,29 @@ export class Garlands {
     }
 
     checkAndUpdateGarlands(worldX, screenWidth) {
-        // Определяем текущий индекс экрана
+        // Determine current screen index
         const currentScreenIndex = Math.floor(worldX / screenWidth);
         
-        // Проверяем каждую гирлянду
+        // Check each garland
         this.sprites.forEach((sprite, index) => {
             const garlandScreenIndex = Math.floor(sprite.x / screenWidth);
             
-            // Если гирлянда находится на экране, который мы уже прошли
+            // If garland is on a screen we've passed
             if (garlandScreenIndex < currentScreenIndex) {
-                // Перемещаем её на два экрана вперед
+                // Move it two screens ahead with better spacing
                 const newScreenIndex = currentScreenIndex + 1;
-                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
-                sprite.x = newScreenIndex * screenWidth + baseX;
+                const baseX = newScreenIndex * screenWidth;
+                const spacing = screenWidth / 4; // Divide screen into 4 sections
+                const section = index % 4;
+                sprite.x = baseX + (section * spacing) + (Math.random() * spacing * 0.5);
             }
-            // Если гирлянда находится на экране, который мы еще не достигли
+            // If garland is on a screen we haven't reached yet
             else if (garlandScreenIndex > currentScreenIndex + 1) {
-                // Перемещаем её на текущий экран
-                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
-                sprite.x = currentScreenIndex * screenWidth + baseX;
+                // Move it to current screen with better spacing
+                const baseX = currentScreenIndex * screenWidth;
+                const spacing = screenWidth / 4;
+                const section = index % 4;
+                sprite.x = baseX + (section * spacing) + (Math.random() * spacing * 0.5);
             }
         });
     }

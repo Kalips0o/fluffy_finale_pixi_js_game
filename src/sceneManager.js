@@ -8,6 +8,7 @@ import { Trees } from './layers/trees';
 import { Rabbit } from './entities/rabbit/rabbit';
 import { Camera } from './camera';
 import { DoctorManager } from './entities/doctor/doctor-manager';
+import { BloodSplatter } from './entities/effects/BloodSplatter';
 
 export class SceneManager {
     constructor(app, resources) {
@@ -31,6 +32,8 @@ export class SceneManager {
         // Создаем менеджер докторов
         this.doctorManager = new DoctorManager(app, resources, this);
         this.doctorManager.init();
+        this.bloodSplatterEffects = [];
+        this.cameraBloodSplatterEffects = []; // New array for camera blood splatters
         if (this.doctorManager) {
             this.doctorManager.doctors.forEach(doctor => {
                 if (doctor.isActive) {
@@ -56,6 +59,27 @@ export class SceneManager {
             this.rabbit.update(delta);
             this.camera.update();
             this.doctorManager.update(delta);
+
+            // Update blood splatter effects
+            for (let i = this.bloodSplatterEffects.length - 1; i >= 0; i--) {
+                const splatter = this.bloodSplatterEffects[i];
+                splatter.update(delta);
+                if (splatter.splatters.length === 0) {
+                    this.bloodSplatterEffects.splice(i, 1);
+                }
+            }
+
+            // Update camera blood splatter effects
+            for (let i = this.cameraBloodSplatterEffects.length - 1; i >= 0; i--) {
+                const splatter = this.cameraBloodSplatterEffects[i];
+                splatter.alpha -= splatter.fadeSpeed * delta;
+                if (splatter.alpha <= 0) {
+                    if (splatter.parent) {
+                        this.app.stage.removeChild(splatter);
+                    }
+                    this.cameraBloodSplatterEffects.splice(i, 1);
+                }
+            }
             this.updateWorldPosition();
             this.updateSpriteZOrder();
         });
@@ -182,5 +206,48 @@ export class SceneManager {
         if (this.doctorManager && this.doctorManager.debugContainer) {
             this.worldContainer.setChildIndex(this.doctorManager.debugContainer, this.worldContainer.children.length - 1);
         }
+
+        // Перемещаем частицы крови на самый верхний слой
+        this.bloodSplatterEffects.forEach(bloodSplatterInstance => {
+            bloodSplatterInstance.splatters.forEach(splatterParticle => {
+                if (splatterParticle && splatterParticle.parent === this.worldContainer) {
+                    this.worldContainer.setChildIndex(splatterParticle, this.worldContainer.children.length - 1);
+                }
+            });
+        });
+    }
+
+    // Метод для добавления эффектов крови
+    addBloodSplatter(splatter) {
+        this.bloodSplatterEffects.push(splatter);
+    }
+
+    // Метод для добавления эффектов крови на камеру
+    addCameraBloodSplatter() {
+        // Create one large blood splatter on the camera
+        const splatterTextureName = Math.random() < 0.5 ? 'blood_spatter_1.png' : 'blood_spatter_3.png';
+        const splatter = new PIXI.Sprite(this.resources.textures[splatterTextureName]);
+        splatter.anchor.set(0.5);
+        splatter.scale.set(6.0 + Math.random() * 3.0); // Extremely large scale to ensure full screen coverage
+
+        if (splatterTextureName === 'blood_spatter_1.png') {
+            // Position for blood_spatter_1.png (bottom-left corner)
+            splatter.x = this.app.screen.width * 0.2; 
+            splatter.y = this.app.screen.height * 0.8; 
+        } else {
+            // Randomly position on left or right side of the screen for other splatters
+            if (Math.random() < 0.5) {
+                splatter.x = this.app.screen.width * 0.2 + Math.random() * this.app.screen.width * 0.1; // Left side
+            } else {
+                splatter.x = this.app.screen.width * 0.8 - Math.random() * this.app.screen.width * 0.1; // Right side
+            }
+            splatter.y = this.app.screen.height * 0.5 + (Math.random() - 0.5) * this.app.screen.height * 0.2; // Vertical position slightly randomized around center
+        }
+
+        splatter.rotation = Math.random() * Math.PI * 2;
+        splatter.alpha = 1;
+        splatter.fadeSpeed = 0.005 + Math.random() * 0.005; // Faster fade for a more noticeable disappearance
+        this.cameraBloodSplatterEffects.push(splatter);
+        this.app.stage.addChild(splatter);
     }
 }

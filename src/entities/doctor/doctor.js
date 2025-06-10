@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js';
+import { BloodSplatter } from '../effects/BloodSplatter';
 
 export class Doctor {
-    constructor(app, resources, x, y) {
+    constructor(app, resources, x, y, sceneManager) {
         this.app = app;
         this.resources = resources;
         this.x = x;
@@ -17,6 +18,8 @@ export class Doctor {
         this.direction = -1; // Начинаем движение влево
         this.startX = x;
         this.walkDistance = 100; // Расстояние, которое доктор проходит в одну сторону
+        
+        this.sceneManager = sceneManager;
         
         this.init();
     }
@@ -74,10 +77,24 @@ export class Doctor {
     }
 
     deactivate() {
-        if (!this.isActive) return; // Предотвращаем повторную деактивацию
+        if (!this.isActive) return; // Prevent multiple deactivations
         this.isActive = false;
         if (this.sprite && this.sprite.parent) {
-            this.sprite.parent.removeChild(this.sprite);
+            // Create blood splatter effect at the doctor's position
+            const splatterX = this.hitbox.x + this.hitbox.width / 2;
+            const splatterY = this.hitbox.y + this.hitbox.height / 2;
+            const splatter = new BloodSplatter(this.app, splatterX, splatterY, this.resources, this.sceneManager.worldContainer);
+            this.sceneManager.addBloodSplatter(splatter);
+
+            // Make doctor sprite invisible immediately
+            this.sprite.visible = false;
+            
+            // Remove the sprite after a short delay to ensure blood effect is visible
+            setTimeout(() => {
+                if (this.sprite && this.sprite.parent) {
+                    this.sprite.parent.removeChild(this.sprite);
+                }
+            }, 100);
         }
         this.sprite = null;
         this.hitbox = null;

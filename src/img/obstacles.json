@@ -4,20 +4,20 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 432,
-        "h": 750
+        "w": 864,
+        "h": 1500
       },
       "rotated": false,
-      "trimmed": false,
+      "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 432,
-        "h": 750
+        "x": 92,
+        "y": 21,
+        "w": 864,
+        "h": 1500
       },
       "sourceSize": {
-        "w": 432,
-        "h": 750
+        "w": 1024,
+        "h": 1536
       },
       "pivot": {
         "x": 0.5,
@@ -27,21 +27,21 @@
     "doctor_1.png": {
       "frame": {
         "x": 0,
-        "y": 750,
-        "w": 450,
-        "h": 738
+        "y": 1500,
+        "w": 900,
+        "h": 1476
       },
       "rotated": false,
-      "trimmed": false,
+      "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 450,
-        "h": 738
+        "x": 61,
+        "y": 40,
+        "w": 900,
+        "h": 1476
       },
       "sourceSize": {
-        "w": 450,
-        "h": 738
+        "w": 1024,
+        "h": 1536
       },
       "pivot": {
         "x": 0.5,
@@ -50,22 +50,22 @@
     },
     "doctor_2.png": {
       "frame": {
-        "x": 432,
+        "x": 864,
         "y": 0,
-        "w": 495.5,
-        "h": 723
+        "w": 991,
+        "h": 1446
       },
       "rotated": false,
-      "trimmed": false,
+      "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 495.5,
-        "h": 723
+        "x": 12,
+        "y": 71,
+        "w": 991,
+        "h": 1446
       },
       "sourceSize": {
-        "w": 495.5,
-        "h": 723
+        "w": 1024,
+        "h": 1536
       },
       "pivot": {
         "x": 0.5,
@@ -74,166 +74,22 @@
     },
     "vaccine.png": {
       "frame": {
-        "x": 0,
-        "y": 1488,
-        "w": 368,
-        "h": 408
+        "x": 1855,
+        "y": 0,
+        "w": 736,
+        "h": 816
       },
       "rotated": false,
-      "trimmed": false,
+      "trimmed": true,
       "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 368,
-        "h": 408
+        "x": 157,
+        "y": 95,
+        "w": 736,
+        "h": 816
       },
       "sourceSize": {
-        "w": 368,
-        "h": 408
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "vaccine-lower-part.png": {
-      "frame": {
-        "x": 0,
-        "y": 1896,
-        "w": 210.5,
-        "h": 196.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 210.5,
-        "h": 196.5
-      },
-      "sourceSize": {
-        "w": 210.5,
-        "h": 196.5
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "blood_spatter_1.png": {
-      "frame": {
-        "x": 210.5,
-        "y": 1896,
-        "w": 129,
-        "h": 96.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 129,
-        "h": 96.5
-      },
-      "sourceSize": {
-        "w": 129,
-        "h": 96.5
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "blood_spatter_2.png": {
-      "frame": {
-        "x": 210.5,
-        "y": 1992.5,
-        "w": 81.5,
-        "h": 82.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 81.5,
-        "h": 82.5
-      },
-      "sourceSize": {
-        "w": 81.5,
-        "h": 82.5
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "fragment__vaccine_1.png": {
-      "frame": {
-        "x": 210.5,
-        "y": 2075,
-        "w": 38,
-        "h": 38.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 38,
-        "h": 38.5
-      },
-      "sourceSize": {
-        "w": 38,
-        "h": 38.5
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "fragment__vaccine_2.png": {
-      "frame": {
-        "x": 248.5,
-        "y": 2075,
-        "w": 38,
-        "h": 38.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 38,
-        "h": 38.5
-      },
-      "sourceSize": {
-        "w": 38,
-        "h": 38.5
-      },
-      "pivot": {
-        "x": 0.5,
-        "y": 0.5
-      }
-    },
-    "blood_spatter_3.png": {
-      "frame": {
-        "x": 292,
-        "y": 1992.5,
-        "w": 58.5,
-        "h": 60.5
-      },
-      "rotated": false,
-      "trimmed": false,
-      "spriteSourceSize": {
-        "x": 0,
-        "y": 0,
-        "w": 58.5,
-        "h": 60.5
-      },
-      "sourceSize": {
-        "w": 58.5,
-        "h": 60.5
+        "w": 1024,
+        "h": 1024
       },
       "pivot": {
         "x": 0.5,
@@ -242,22 +98,262 @@
     },
     "vaccine-top-part.png": {
       "frame": {
-        "x": 368,
-        "y": 1488,
-        "w": 229,
-        "h": 266
+        "x": 2591,
+        "y": 0,
+        "w": 458,
+        "h": 532
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 229,
-        "h": 266
+        "w": 458,
+        "h": 532
       },
       "sourceSize": {
-        "w": 229,
-        "h": 266
+        "w": 458,
+        "h": 532
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "central_blood_surge.png": {
+      "frame": {
+        "x": 3049,
+        "y": 0,
+        "w": 434,
+        "h": 490
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 28,
+        "y": 10,
+        "w": 434,
+        "h": 490
+      },
+      "sourceSize": {
+        "w": 500,
+        "h": 500
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "vaccine-lower-part.png": {
+      "frame": {
+        "x": 3049,
+        "y": 490,
+        "w": 421,
+        "h": 393
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 421,
+        "h": 393
+      },
+      "sourceSize": {
+        "w": 421,
+        "h": 393
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "drops_of_blood.png": {
+      "frame": {
+        "x": 2591,
+        "y": 532,
+        "w": 412,
+        "h": 258
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 412,
+        "h": 258
+      },
+      "sourceSize": {
+        "w": 412,
+        "h": 258
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_under_the_hammer.png": {
+      "frame": {
+        "x": 2591,
+        "y": 790,
+        "w": 351,
+        "h": 283
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 351,
+        "h": 283
+      },
+      "sourceSize": {
+        "w": 351,
+        "h": 283
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_1.png": {
+      "frame": {
+        "x": 2942,
+        "y": 883,
+        "w": 258,
+        "h": 193
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 258,
+        "h": 193
+      },
+      "sourceSize": {
+        "w": 258,
+        "h": 193
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "pool_of_blood.png": {
+      "frame": {
+        "x": 3200,
+        "y": 883,
+        "w": 230,
+        "h": 78
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 20,
+        "y": 0,
+        "w": 230,
+        "h": 78
+      },
+      "sourceSize": {
+        "w": 254,
+        "h": 78
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_2.png": {
+      "frame": {
+        "x": 3200,
+        "y": 961,
+        "w": 163,
+        "h": 165
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 163,
+        "h": 165
+      },
+      "sourceSize": {
+        "w": 163,
+        "h": 165
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "blood_spatter_3.png": {
+      "frame": {
+        "x": 3363,
+        "y": 961,
+        "w": 117,
+        "h": 121
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 117,
+        "h": 121
+      },
+      "sourceSize": {
+        "w": 117,
+        "h": 121
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fragment__vaccine_1.png": {
+      "frame": {
+        "x": 2942,
+        "y": 790,
+        "w": 76,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 12,
+        "y": 11,
+        "w": 76,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 100
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "fragment__vaccine_2.png": {
+      "frame": {
+        "x": 3363,
+        "y": 1082,
+        "w": 76,
+        "h": 77
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 12,
+        "y": 11,
+        "w": 76,
+        "h": 77
+      },
+      "sourceSize": {
+        "w": 100,
+        "h": 100
       },
       "pivot": {
         "x": 0.5,
@@ -271,9 +367,9 @@
     "image": "obstacles.png",
     "format": "RGBA8888",
     "size": {
-      "w": 928,
-      "h": 2114
+      "w": 3483,
+      "h": 2976
     },
-    "scale": 0.5
+    "scale": 1
   }
 }
