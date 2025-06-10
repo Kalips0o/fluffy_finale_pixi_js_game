@@ -146,6 +146,11 @@ export class SceneManager {
             });
         }
         this.worldContainer.setChildIndex(this.rabbit.sprite, this.worldContainer.children.length - 1); // Перемещаем кролика на самый верхний слой
+
+        // Перемещаем отладочный контейнер на самый верх
+        if (this.doctorManager && this.doctorManager.debugContainer) {
+            this.worldContainer.setChildIndex(this.doctorManager.debugContainer, this.worldContainer.children.length - 1);
+        }
     }
 
     // Добавляем метод для принудительной перерисовки сцены
@@ -173,11 +178,9 @@ export class SceneManager {
             this.worldContainer.setChildIndex(this.rabbit.sprite, this.worldContainer.children.length - 1);
         }
 
-        // Если есть активный эффект удара, помещаем его поверх кролика
-        if (this.rabbit && this.rabbit.effects && this.rabbit.effects.hitEffect && 
-            this.rabbit.effects.hitEffect.visible && 
-            this.rabbit.effects.hitEffect.parent === this.worldContainer) {
-            this.worldContainer.setChildIndex(this.rabbit.effects.hitEffect, this.worldContainer.children.length - 1);
+        // Перемещаем отладочный контейнер на самый верх
+        if (this.doctorManager && this.doctorManager.debugContainer) {
+            this.worldContainer.setChildIndex(this.doctorManager.debugContainer, this.worldContainer.children.length - 1);
         }
     }
 }

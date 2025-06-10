@@ -60,6 +60,7 @@ export class Trees {
 
     updatePosition(camera) {
         const worldX = camera.currentX;
+        const screenWidth = this.app.screen.width;
 
         // Обновляем позиции крон
         this.sprites.crowns.forEach((sprite, index) => {
@@ -75,24 +76,22 @@ export class Trees {
 
     checkAndUpdateTrunks(worldX) {
         const screenWidth = this.app.screen.width;
-        const currentScreenIndex = Math.floor(worldX / screenWidth);
-
-        // Проверяем каждый ствол
-        this.sprites.trunks.forEach((sprite, index) => {
-            const trunkScreenIndex = Math.floor(sprite.x / screenWidth);
+        
+        // Проверяем каждую пару стволов
+        this.sprites.trunks.forEach((trunkPair, index) => {
+            const trunkScreenIndex = Math.floor(trunkPair.x / screenWidth);
+            const currentScreenIndex = Math.floor(worldX / screenWidth);
             
-            // Если ствол находится на экране, который мы уже прошли
+            // Если стволы находятся на экране, который мы уже прошли
             if (trunkScreenIndex < currentScreenIndex) {
-                // Перемещаем его на два экрана вперед
+                // Перемещаем их на два экрана вперед
                 const newScreenIndex = currentScreenIndex + 1;
-                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
-                sprite.x = newScreenIndex * screenWidth + baseX;
+                trunkPair.x = newScreenIndex * screenWidth + (trunkPair.x % screenWidth);
             }
-            // Если ствол находится на экране, который мы еще не достигли
+            // Если стволы находятся на экране, который мы еще не достигли
             else if (trunkScreenIndex > currentScreenIndex + 1) {
-                // Перемещаем его на текущий экран
-                const baseX = (index % 2 === 0 ? 0.3 : 0.7) * screenWidth;
-                sprite.x = currentScreenIndex * screenWidth + baseX;
+                // Перемещаем их на текущий экран
+                trunkPair.x = currentScreenIndex * screenWidth + (trunkPair.x % screenWidth);
             }
         });
     }

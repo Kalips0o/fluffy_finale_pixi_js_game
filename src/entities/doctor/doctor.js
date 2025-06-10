@@ -33,10 +33,10 @@ export class Doctor {
         
         // Создаем хитбокс
         this.hitbox = new PIXI.Rectangle(
-            this.sprite.x - this.sprite.width * 0.3,
-            this.sprite.y - this.sprite.height * 0.3,
-            this.sprite.width * 0.6,
-            this.sprite.height * 0.6
+            this.sprite.x - this.sprite.width * 0.4,
+            this.sprite.y - this.sprite.height * 0.4,
+            this.sprite.width * 0.8,
+            this.sprite.height * 0.8
         );
     }
 
@@ -62,8 +62,8 @@ export class Doctor {
         }
 
         // Обновляем хитбокс
-        this.hitbox.x = this.sprite.x - this.sprite.width * 0.3;
-        this.hitbox.y = this.sprite.y - this.sprite.height * 0.3;
+        this.hitbox.x = this.sprite.x - this.sprite.width * 0.4;
+        this.hitbox.y = this.sprite.y - this.sprite.height * 0.4;
     }
 
     checkCollision(rabbit) {

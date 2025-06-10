@@ -43,7 +43,7 @@ export class RabbitAnimations {
         this.rabbit.sprite.texture = this.getFrame(name, 0);
 
         // Обновляем масштаб и направление
-        const scale = name === 'hit' ? 0.13 : 0.15;
+        const scale = name === 'hit' ? 0.14 : 0.15;
         this.rabbit.sprite.scale.set(scale);
         if (this.rabbit.direction === -1) {
             this.rabbit.sprite.scale.x = -scale;
@@ -94,23 +94,26 @@ export class RabbitAnimations {
                 this.rabbit.physics.hitActive = false;
             }
 
-            // Если достигли последнего кадра анимации удара
-            if (this.animationFrame >= this.animations.hit.length) {
-                this.animationFrame = this.animations.hit.length - 1;
-            }
-
-            // Если произошло приземление, показываем соответствующую текстуру
-            if (this.rabbit.physics.hitLanding) {
+            // Если произошло приземление и мы достигли последнего кадра анимации удара, устанавливаем финальную текстуру.
+            if (this.rabbit.physics.hitLanding && this.animationFrame >= this.animations.hit.length - 1) {
                 if (this.rabbit.physics.hitDoctor) {
                     this.rabbit.sprite.texture = this.resources.textures['bunny_hits_4.png'];
                 } else {
                     this.rabbit.sprite.texture = this.resources.textures['bunny_hits_the_ground.png'];
                 }
-                return;
+                // Устанавливаем специфический масштаб для этих текстур
+                const finalScale = 0.12;
+                this.rabbit.sprite.scale.set(finalScale);
+                if (this.rabbit.direction === -1) {
+                    this.rabbit.sprite.scale.x = -finalScale;
+                }
+                return; // Останавливаем дальнейшее обновление анимации удара
             }
 
-            // Показываем текущий кадр анимации
-            this.rabbit.sprite.texture = this.animations.hit[this.animationFrame];
+            // Показываем текущий кадр анимации, если анимация не завершена и не приземлилась
+            if (this.animationFrame < this.animations.hit.length) {
+                this.rabbit.sprite.texture = this.animations.hit[this.animationFrame];
+            }
         }
     }
 }

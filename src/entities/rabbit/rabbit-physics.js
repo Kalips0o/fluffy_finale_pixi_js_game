@@ -32,12 +32,18 @@ export class RabbitPhysics {
     }
 
     updateHitArea() {
-        const hitWidth = 50;
-        const hitHeight = 30;
-        const offsetX = this.rabbit.direction === 1 ? 30 : -hitWidth - 30;
+        const hitWidth = 100;
+        const hitHeight = 80;
+        let offsetX;
+
+        if (this.rabbit.direction === 1) {
+            offsetX = 30;
+        } else {
+            offsetX = -hitWidth - 30;
+        }
 
         this.hitArea.x = this.rabbit.sprite.x + offsetX;
-        this.hitArea.y = this.rabbit.sprite.y - hitHeight/2;
+        this.hitArea.y = this.rabbit.sprite.y + 30;
         this.hitArea.width = hitWidth;
         this.hitArea.height = hitHeight;
     }
@@ -134,7 +140,18 @@ export class RabbitPhysics {
     handleHitLanding() {
         if (this.hitLanding) return; // Prevent multiple landings
         this.hitLanding = true;
-        this.rabbit.effects.showGroundHit();
+
+        // Устанавливаем правильную текстуру для последнего кадра удара сразу при приземлении
+        if (this.hitDoctor) {
+            this.rabbit.sprite.texture = this.rabbit.resources.textures['bunny_hits_4.png'];
+        } else {
+            this.rabbit.sprite.texture = this.rabbit.resources.textures['bunny_hits_the_ground.png'];
+        }
+        this.rabbit.sprite.scale.set(0.15);
+        if (this.rabbit.direction === -1) {
+            this.rabbit.sprite.scale.x = -0.14;
+        }
+
         this.rabbit.sprite.rotation = 0;
 
         // Clear any existing timeout
@@ -148,11 +165,12 @@ export class RabbitPhysics {
             this.hitActive = false;
             this.hitLanding = false;
             this.hitDoctor = false;
+
+            // Масштаб вернется к 0.15 при переходе в 'run' или 'idle' анимацию
             if (this.rabbit.isMoving) {
                 this.rabbit.animations.play('run');
             } else {
                 this.rabbit.animations.stop();
-                this.rabbit.sprite.texture = this.rabbit.animations.getFrame('idle', 0);
             }
         }, 700);
     }

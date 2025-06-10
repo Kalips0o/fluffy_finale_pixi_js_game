@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js';
 import { Doctor } from './doctor';
 
 export class DoctorManager {
@@ -9,6 +10,10 @@ export class DoctorManager {
         this.spawnInterval = 5000; // Интервал появления докторов (в миллисекундах)
         this.lastSpawnTime = 0;
         this.minSpawnDistance = 1000; // Минимальное расстояние между докторами
+
+        // Создаем контейнер для отладочной графики
+        this.debugContainer = new PIXI.Container();
+        this.sceneManager.worldContainer.addChild(this.debugContainer);
     }
 
     init() {
@@ -35,6 +40,11 @@ export class DoctorManager {
         
         // Добавляем доктора в контейнер мира
         this.sceneManager.worldContainer.addChild(doctor.sprite);
+        
+        // Создаем и добавляем графику для отладки
+        doctor.debugGraphics = new PIXI.Graphics();
+        this.debugContainer.addChild(doctor.debugGraphics);
+        
         this.doctors.push(doctor);
         
         this.lastSpawnTime = currentTime;
@@ -53,17 +63,58 @@ export class DoctorManager {
         // Обновляем существующих докторов
         this.doctors = this.doctors.filter(doctor => {
             if (!doctor.isActive) {
+                // Удаляем графику отладки
+                if (doctor.debugGraphics && doctor.debugGraphics.parent) {
+                    doctor.debugGraphics.parent.removeChild(doctor.debugGraphics);
+                }
                 doctor.deactivate();
                 return false;
             }
 
             doctor.update(delta);
             
+            // Обновляем графику отладки
+            if (doctor.debugGraphics) {
+                doctor.debugGraphics.clear();
+                doctor.debugGraphics.lineStyle(2, 0x00FF00);
+                doctor.debugGraphics.drawRect(doctor.hitbox.x, doctor.hitbox.y, doctor.hitbox.width, doctor.hitbox.height);
+            }
+            
             // Проверяем столкновение с кроликом только если доктор активен
-            if (doctor.isActive && doctor.checkCollision(this.sceneManager.rabbit)) {
-                this.handleCollision(doctor);
-                doctor.deactivate();
-                return false;
+            if (doctor.isActive) {
+                const rabbit = this.sceneManager.rabbit;
+                if (rabbit.physics.hitActive) {
+                    // Проверяем пересечение хитбоксов
+                    const hitArea = rabbit.physics.hitArea;
+                    const doctorHitbox = doctor.hitbox;
+                    
+                    // Проверяем пересечение по всем сторонам
+                    const collision = 
+                        hitArea.x < doctorHitbox.x + doctorHitbox.width &&
+                        hitArea.x + hitArea.width > doctorHitbox.x &&
+                        hitArea.y < doctorHitbox.y + doctorHitbox.height &&
+                        hitArea.y + hitArea.height > doctorHitbox.y;
+
+                    if (collision) {
+                        console.log('Collision detected!', {
+                            hitArea: {
+                                x: hitArea.x,
+                                y: hitArea.y,
+                                width: hitArea.width,
+                                height: hitArea.height
+                            },
+                            doctorHitbox: {
+                                x: doctorHitbox.x,
+                                y: doctorHitbox.y,
+                                width: doctorHitbox.width,
+                                height: doctorHitbox.height
+                            }
+                        });
+                        this.handleCollision(doctor);
+                        doctor.deactivate();
+                        return false;
+                    }
+                }
             }
             
             return doctor.isActive;
@@ -75,7 +126,10 @@ export class DoctorManager {
         
         // Если кролик в процессе удара (активен хитбокс), доктор исчезает
         if (this.sceneManager.rabbit.physics.hitActive) {
+            console.log('Setting hitDoctor flag'); // Добавляем отладочный вывод
+            // Устанавливаем флаг удара по доктору
             this.sceneManager.rabbit.physics.hitDoctor = true;
+            // Деактивируем доктора
             doctor.deactivate();
         } else {
             // Иначе кролик получает урон
