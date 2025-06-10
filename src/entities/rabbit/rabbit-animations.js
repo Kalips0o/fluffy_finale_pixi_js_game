@@ -43,7 +43,7 @@ export class RabbitAnimations {
         this.rabbit.sprite.texture = this.getFrame(name, 0);
 
         // Обновляем масштаб и направление
-        const scale = name === 'hit' ? 0.14 : 0.15;
+        const scale = 0.15;
         this.rabbit.sprite.scale.set(scale);
         if (this.rabbit.direction === -1) {
             this.rabbit.sprite.scale.x = -scale;

@@ -147,9 +147,10 @@ export class RabbitPhysics {
         } else {
             this.rabbit.sprite.texture = this.rabbit.resources.textures['bunny_hits_the_ground.png'];
         }
-        this.rabbit.sprite.scale.set(0.15);
+        const scale = 0.15;
+        this.rabbit.sprite.scale.set(scale);
         if (this.rabbit.direction === -1) {
-            this.rabbit.sprite.scale.x = -0.14;
+            this.rabbit.sprite.scale.x = -scale;
         }
 
         this.rabbit.sprite.rotation = 0;
