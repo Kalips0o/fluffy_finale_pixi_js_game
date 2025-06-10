@@ -147,40 +147,58 @@ export class DoctorManager {
             return;
         }
         
-        // If rabbit is just passing through, trigger game over
-        this.triggerGameOver(rabbit);
-    }
-
-    triggerGameOver(rabbit) {
-        // Stop rabbit movement
+        console.log('Regular collision detected, triggering game over');
+        // Immediately stop rabbit movement and change texture
         rabbit.physics.speed = 0;
         rabbit.physics.isJumping = false;
         rabbit.physics.isHitting = false;
         rabbit.physics.gameOver = true;
         
-        // Play falling animation sequence
-        this.playFallingAnimation(rabbit);
-    }
-
-    playFallingAnimation(rabbit) {
-        // Immediately change to falling sprite and set proper scale
+        // Stop any current animations
+        if (rabbit.animations) {
+            rabbit.animations.stop();
+        }
+        
+        // Change to falling sprite immediately
         rabbit.sprite.texture = rabbit.resources.textures['rabbit_fell_2.png'];
         const scale = 0.15;
         rabbit.sprite.scale.set(scale);
         if (rabbit.direction === -1) {
             rabbit.sprite.scale.x = -scale;
         }
+        rabbit.sprite.rotation = 0;
         
+        // Disable controls
+        if (rabbit.controls) {
+            rabbit.controls.disable();
+        }
+        
+        // Start falling animation after a short delay
+        setTimeout(() => {
+            this.playFallingAnimation(rabbit);
+        }, 100);
+    }
+
+    triggerGameOver(rabbit) {
+        // This method is now just a wrapper for handleCollision
+        this.handleCollision(rabbit);
+    }
+
+    playFallingAnimation(rabbit) {
         // Start spiral falling animation
         const startX = rabbit.sprite.x;
         const startY = rabbit.sprite.y;
-        const direction = rabbit.direction; // Get rabbit's direction
-        const targetX = startX + (direction * 200); // Move forward in the direction rabbit was moving
-        const targetY = startY - 150; // First move up
-        const finalY = startY - 50; // Fall between grass layers
-        const startRotation = 0;
-        const targetRotation = Math.PI * 4; // Two full rotations
-        const duration = 2000; // 2 seconds for smoother animation
+        const direction = rabbit.direction;
+        const groundY = rabbit.physics.getGrassY();
+        
+        // Define bounce points with increased distance and height
+        const bounces = [
+            { x: startX + (direction * 150), y: groundY - 20, rotation: Math.PI * 0.5 },  // First bounce
+            { x: startX + (direction * 280), y: groundY - 15, rotation: Math.PI * 1.2 },  // Second bounce
+            { x: startX + (direction * 350), y: groundY - 80, rotation: Math.PI * 1.8 }   // Final jump before hiding
+        ];
+        
+        const duration = 2500;
         const startTime = Date.now();
         
         const animate = () => {
@@ -188,42 +206,56 @@ export class DoctorManager {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Smoother easing function
-            const easeProgress = 1 - Math.pow(1 - progress, 4); // Changed to power of 4 for smoother motion
+            // Calculate which bounce we're in
+            const bounceProgress = progress * bounces.length;
+            const currentBounce = Math.floor(bounceProgress);
+            const bounceFraction = bounceProgress - currentBounce;
             
-            // Calculate spiral movement with smoother sine
-            const spiralProgress = Math.sin(progress * Math.PI * 3) * 40; // Reduced amplitude and frequency
+            // Get current and next bounce points
+            const current = bounces[Math.min(currentBounce, bounces.length - 1)];
+            const next = bounces[Math.min(currentBounce + 1, bounces.length - 1)];
             
-            // Update position with spiral effect
-            rabbit.sprite.x = startX + (targetX - startX) * easeProgress + spiralProgress;
-            
-            // First move up, then down with smoother transition
-            if (progress < 0.4) { // Longer upward phase
-                // Moving up phase with smooth easing
-                const upProgress = progress / 0.4; // Scale to 0-1
-                const upEase = 1 - Math.pow(1 - upProgress, 2); // Quadratic easing
-                rabbit.sprite.y = startY + (targetY - startY) * upEase;
+            // Calculate position with bounce effect
+            if (currentBounce < bounces.length - 1) {
+                // Parabolic movement between bounces
+                const height = 50 * Math.sin(bounceFraction * Math.PI);
+                rabbit.sprite.x = current.x + (next.x - current.x) * bounceFraction;
+                rabbit.sprite.y = current.y + (next.y - current.y) * bounceFraction - height;
+                rabbit.sprite.rotation = current.rotation + (next.rotation - current.rotation) * bounceFraction;
             } else {
-                // Falling down phase with smooth easing
-                const downProgress = (progress - 0.4) / 0.6; // Scale to 0-1
-                const downEase = 1 - Math.pow(1 - downProgress, 3); // Cubic easing
-                rabbit.sprite.y = targetY + (finalY - targetY) * downEase;
+                // Final jump and hide
+                const finalProgress = (progress - (bounces.length - 1) / bounces.length) * bounces.length;
+                
+                if (finalProgress < 0.5) {
+                    // Jump up
+                    const jumpHeight = 100 * Math.sin(finalProgress * Math.PI);
+                    rabbit.sprite.x = next.x;
+                    rabbit.sprite.y = next.y - jumpHeight;
+                    rabbit.sprite.rotation = next.rotation;
+                } else {
+                    // Move behind grass
+                    rabbit.sprite.x = next.x;
+                    rabbit.sprite.y = groundY + 50; // Move below grass
+                    rabbit.sprite.rotation = next.rotation;
+                }
             }
             
-            // Smoother rotation
-            rabbit.sprite.rotation = startRotation + targetRotation * easeProgress;
+            // Ensure the falling texture is maintained
+            rabbit.sprite.texture = rabbit.resources.textures['rabbit_fell_2.png'];
             
             // Continue animation if not finished
             if (progress < 1) {
                 requestAnimationFrame(animate);
             } else {
-                // Hide rabbit completely after animation
-                rabbit.sprite.visible = false;
+                // Move to back layer only at the very end
+                if (rabbit.sprite.parent) {
+                    rabbit.sprite.parent.removeChild(rabbit.sprite);
+                    rabbit.sceneManager.worldContainer.addChildAt(rabbit.sprite, 0);
+                }
                 
-                // Show game over screen
-                setTimeout(() => {
-                    this.showGameOver();
-                }, 500);
+                // Hide sprite and show game over
+                rabbit.sprite.visible = false;
+                this.showGameOver();
             }
         };
         

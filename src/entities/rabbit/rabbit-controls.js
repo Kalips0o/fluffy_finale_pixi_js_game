@@ -1,6 +1,7 @@
 export class RabbitControls {
     constructor(rabbit) {
         this.rabbit = rabbit;
+        this.enabled = true;
     }
 
     setup() {
@@ -8,7 +9,16 @@ export class RabbitControls {
         window.addEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
+    disable() {
+        this.enabled = false;
+        // Remove event listeners
+        window.removeEventListener('keydown', this.handleKeyDown.bind(this));
+        window.removeEventListener('keyup', this.handleKeyUp.bind(this));
+    }
+
     handleKeyDown(e) {
+        if (!this.enabled) return;
+        
         if (e.key === 'ArrowLeft' && !this.rabbit.physics.isJumping && !this.rabbit.physics.isHitting) {
             this.rabbit.isMoving = true;
             this.rabbit.direction = -1;
@@ -28,6 +38,8 @@ export class RabbitControls {
     }
 
     handleKeyUp(e) {
+        if (!this.enabled) return;
+        
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
             this.rabbit.isMoving = false;
             if (!this.rabbit.physics.isJumping && !this.rabbit.physics.isHitting) {
