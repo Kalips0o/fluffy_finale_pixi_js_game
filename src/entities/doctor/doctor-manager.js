@@ -166,6 +166,14 @@ export class DoctorManager {
         if (rabbit.controls) {
             rabbit.controls.disable();
         }
+
+        // Скрываем кнопку паузы и панель паузы
+        if (this.sceneManager.pauseButton) {
+            this.sceneManager.pauseButton.visible = false;
+        }
+        if (this.sceneManager.pausePanel) {
+            this.sceneManager.pausePanel.visible = false;
+        }
         
         // Start falling animation
         rabbit.animations.play('falling');

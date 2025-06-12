@@ -270,8 +270,8 @@ export class SceneManager {
     }
 
     updateWorldPosition() {
-        // Show pause button when camera starts moving
-        if (this.camera.currentX > 0 && !this.pauseButton.visible) {
+        // Show pause button when camera starts moving and game is not over
+        if (this.camera.currentX > 0 && !this.pauseButton.visible && !this.rabbit.physics.gameOver) {
             this.pauseButton.visible = true;
         }
 

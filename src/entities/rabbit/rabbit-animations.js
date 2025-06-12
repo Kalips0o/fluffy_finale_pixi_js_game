@@ -1,3 +1,4 @@
+import * as PIXI from 'pixi.js';
 import { HammerAnimation } from '../effects/HammerAnimation';
 import { DustAnimation } from '../effects/DustAnimation';
 
@@ -11,6 +12,7 @@ export class RabbitAnimations {
         this.animationTime = 0;
         this.hammerAnimation = new HammerAnimation(app, resources, worldContainer);
         this.dustAnimation = new DustAnimation(app, resources, worldContainer);
+        this.sceneManager = rabbit.sceneManager;
 
         this.animationSpeeds = {
             run: 1.4,
@@ -126,6 +128,15 @@ export class RabbitAnimations {
     }
 
     playFallingAnimation() {
+        // Скрываем кнопку паузы в начале падения
+        if (this.sceneManager && this.sceneManager.pauseButton) {
+            console.log('Hiding pause button at start of falling');
+            this.sceneManager.pauseButton.visible = false;
+            if (this.sceneManager.pausePanel) {
+                this.sceneManager.pausePanel.visible = false;
+            }
+        }
+
         const startX = this.rabbit.sprite.x;
         const startY = this.rabbit.sprite.y;
         const direction = this.rabbit.direction;
@@ -227,9 +238,9 @@ export class RabbitAnimations {
         gameOverSprite.anchor.set(0.5);
         gameOverSprite.x = this.rabbit.app.screen.width / 2;
         gameOverSprite.y = this.rabbit.app.screen.height / 2;
-        gameOverSprite.scale.set(0.5);
+        gameOverSprite.scale.set(0.35);
+        gameOverSprite.eventMode = 'static';
         this.rabbit.app.stage.addChild(gameOverSprite);
-        gameOverSprite.interactive = true;
         gameOverSprite.on('pointerdown', () => {
             window.location.reload();
         });
