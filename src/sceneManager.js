@@ -26,7 +26,7 @@ export class SceneManager {
 
         // Создаем зайца
         this.rabbit = new Rabbit(app, resources, this);
-        this.worldContainer.addChild(this.rabbit.sprite);
+        this.worldContainer.addChildAt(this.rabbit.sprite, 0);  // Добавляем кролика на самый задний план
         this.camera.setTarget(this.rabbit);
 
         // Создаем менеджер докторов

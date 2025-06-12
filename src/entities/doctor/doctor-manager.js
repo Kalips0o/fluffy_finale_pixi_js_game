@@ -159,125 +159,18 @@ export class DoctorManager {
             rabbit.animations.stop();
         }
         
-        // Change to falling sprite immediately
-        rabbit.sprite.texture = rabbit.resources.textures['rabbit_fell_2.png'];
-        const scale = 0.15;
-        rabbit.sprite.scale.set(scale);
-        if (rabbit.direction === -1) {
-            rabbit.sprite.scale.x = -scale;
-        }
-        rabbit.sprite.rotation = 0;
-        
         // Disable controls
         if (rabbit.controls) {
             rabbit.controls.disable();
         }
         
-        // Start falling animation after a short delay
-        setTimeout(() => {
-            this.playFallingAnimation(rabbit);
-        }, 100);
+        // Start falling animation
+        rabbit.animations.play('falling');
     }
 
     triggerGameOver(rabbit) {
         // This method is now just a wrapper for handleCollision
         this.handleCollision(rabbit);
-    }
-
-    playFallingAnimation(rabbit) {
-        // Start spiral falling animation
-        const startX = rabbit.sprite.x;
-        const startY = rabbit.sprite.y;
-        const direction = rabbit.direction;
-        const groundY = rabbit.physics.getGrassY();
-        
-        // Define bounce points with increased distance and height
-        const bounces = [
-            { x: startX + (direction * 150), y: groundY - 20, rotation: Math.PI * 0.5 },  // First bounce
-            { x: startX + (direction * 280), y: groundY - 15, rotation: Math.PI * 1.2 },  // Second bounce
-            { x: startX + (direction * 350), y: groundY - 80, rotation: Math.PI * 1.8 }   // Final jump before hiding
-        ];
-        
-        const duration = 2500;
-        const startTime = Date.now();
-        
-        const animate = () => {
-            const currentTime = Date.now();
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            // Calculate which bounce we're in
-            const bounceProgress = progress * bounces.length;
-            const currentBounce = Math.floor(bounceProgress);
-            const bounceFraction = bounceProgress - currentBounce;
-            
-            // Get current and next bounce points
-            const current = bounces[Math.min(currentBounce, bounces.length - 1)];
-            const next = bounces[Math.min(currentBounce + 1, bounces.length - 1)];
-            
-            // Calculate position with bounce effect
-            if (currentBounce < bounces.length - 1) {
-                // Parabolic movement between bounces
-                const height = 50 * Math.sin(bounceFraction * Math.PI);
-                rabbit.sprite.x = current.x + (next.x - current.x) * bounceFraction;
-                rabbit.sprite.y = current.y + (next.y - current.y) * bounceFraction - height;
-                rabbit.sprite.rotation = current.rotation + (next.rotation - current.rotation) * bounceFraction;
-            } else {
-                // Final jump and hide
-                const finalProgress = (progress - (bounces.length - 1) / bounces.length) * bounces.length;
-                
-                if (finalProgress < 0.5) {
-                    // Jump up
-                    const jumpHeight = 100 * Math.sin(finalProgress * Math.PI);
-                    rabbit.sprite.x = next.x;
-                    rabbit.sprite.y = next.y - jumpHeight;
-                    rabbit.sprite.rotation = next.rotation;
-                } else {
-                    // Move behind grass
-                    rabbit.sprite.x = next.x;
-                    rabbit.sprite.y = groundY + 50; // Move below grass
-                    rabbit.sprite.rotation = next.rotation;
-                }
-            }
-            
-            // Ensure the falling texture is maintained
-            rabbit.sprite.texture = rabbit.resources.textures['rabbit_fell_2.png'];
-            
-            // Continue animation if not finished
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // Move to back layer only at the very end
-                if (rabbit.sprite.parent) {
-                    rabbit.sprite.parent.removeChild(rabbit.sprite);
-                    rabbit.sceneManager.worldContainer.addChildAt(rabbit.sprite, 0);
-                }
-                
-                // Hide sprite and show game over
-                rabbit.sprite.visible = false;
-                this.showGameOver();
-            }
-        };
-        
-        // Start animation
-        requestAnimationFrame(animate);
-    }
-
-    showGameOver() {
-        const gameOverSprite = new PIXI.Sprite(this.resources.textures['game-over.png']);
-        gameOverSprite.anchor.set(0.5);
-        gameOverSprite.x = this.app.screen.width / 2;
-        gameOverSprite.y = this.app.screen.height / 2;
-        gameOverSprite.scale.set(0.5);
-        
-        // Add to stage instead of world container so it's not affected by camera
-        this.app.stage.addChild(gameOverSprite);
-        
-        // Add click handler to restart game
-        gameOverSprite.interactive = true;
-        gameOverSprite.on('pointerdown', () => {
-            window.location.reload();
-        });
     }
 
     cleanup() {

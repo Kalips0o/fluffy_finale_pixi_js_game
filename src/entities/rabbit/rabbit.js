@@ -11,7 +11,7 @@ export class Rabbit {
         this.sceneManager = sceneManager;
 
         // Подкомпоненты
-        this.animations = new RabbitAnimations(this, resources);
+        this.animations = new RabbitAnimations(this, resources, app, sceneManager.worldContainer);
         this.controls = new RabbitControls(this);
         this.physics = new RabbitPhysics(this);
         this.effects = new RabbitEffects(this, resources);

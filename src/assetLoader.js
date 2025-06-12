@@ -31,7 +31,9 @@ export async function loadAssets() {
             'firefly_3.png',
             'firefly_4.png',
             'firefly_5.png',
-            'doctor_1.png'
+            'doctor_1.png',
+            'hammer.png',
+            'dust_clouds.png'
         ];
 
         // Создаем текстуры из спрайт-листов
