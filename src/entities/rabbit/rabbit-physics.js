@@ -7,9 +7,17 @@ export class RabbitPhysics {
         this.speed = 5;
         this.isJumping = false;
         this.isHitting = false;
+        
+        // Параметры для прыжка
+        this.jumpPower = -70;
+        this.jumpGravity = 0.35;
+        this.jumpForwardSpeed = 10;
+        
+        // Параметры для удара
         this.hitJumpPower = -25;
-        this.jumpPower = -40;
-        this.gravity = 0.6;
+        this.hitGravity = 0.6;
+        this.hitForwardSpeed = 2;
+        
         this.jumpVelocity = 0;
         this.hitLanding = false;
         this.hitDoctor = false;
@@ -90,14 +98,24 @@ export class RabbitPhysics {
     handleJump(delta) {
         if (this.gameOver) return;
         if (this.isJumping || this.isHitting) {
-            this.jumpVelocity += this.gravity;
+            // Выбираем параметры в зависимости от типа действия
+            const gravity = this.isHitting ? this.hitGravity : this.jumpGravity;
+            this.jumpVelocity += gravity;
             this.rabbit.sprite.y += this.jumpVelocity * delta;
 
-            if (this.jumpVelocity < 0) {
-                const jumpPower = this.isHitting ? this.hitJumpPower : this.jumpPower;
-                const forwardSpeed = this.isHitting ? 5 : 3;
-                const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(jumpPower);
-                const speed = forwardSpeed * (1 - jumpProgress * 0.5);
+            // Движение вперед
+            if (this.isHitting) {
+                // При ударе двигаемся вперед только когда прыгаем вверх
+                if (this.jumpVelocity < 0) {
+                    const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.hitJumpPower);
+                    const speed = this.hitForwardSpeed * (1 - jumpProgress * 0.2);
+                    const newX = this.rabbit.sprite.x + speed * this.rabbit.direction * delta;
+                    this.rabbit.sprite.x = newX;
+                }
+            } else {
+                // При обычном прыжке двигаемся вперед всегда
+                const jumpProgress = Math.abs(this.jumpVelocity) / Math.abs(this.jumpPower);
+                const speed = this.jumpForwardSpeed * (1 - jumpProgress * 0.2);
                 const newX = this.rabbit.sprite.x + speed * this.rabbit.direction * delta;
 
                 // Проверяем границы движения при прыжке
