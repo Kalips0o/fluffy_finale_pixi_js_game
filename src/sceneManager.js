@@ -14,7 +14,8 @@ export class SceneManager {
     constructor(app, resources) {
         this.app = app;
         this.resources = resources;
-        
+        this.isPaused = false;
+
         // Создаем контейнеры
         this.camera = new Camera(app);
         this.worldContainer = new PIXI.Container();
@@ -54,40 +55,181 @@ export class SceneManager {
         // Сначала отрисовываем сцену
         this.drawScene();
 
+        // Добавляем кнопку паузы
+        this.createPauseButton();
+
         // Затем добавляем обновление состояния зайца и камеры в игровой цикл
         this.app.ticker.add((delta) => {
-            this.rabbit.update(delta);
-            this.camera.update();
-            this.doctorManager.update(delta);
+            if (!this.isPaused) {
+                this.rabbit.update(delta);
+                this.camera.update();
+                this.doctorManager.update(delta);
 
-            // Update blood splatter effects
-            for (let i = this.bloodSplatterEffects.length - 1; i >= 0; i--) {
-                const splatter = this.bloodSplatterEffects[i];
-                splatter.update(delta);
-                if (splatter.splatters.length === 0) {
-                    this.bloodSplatterEffects.splice(i, 1);
-                }
-            }
-
-            // Update camera blood splatter effects
-            for (let i = this.cameraBloodSplatterEffects.length - 1; i >= 0; i--) {
-                const splatter = this.cameraBloodSplatterEffects[i];
-                splatter.alpha -= splatter.fadeSpeed * delta;
-                if (splatter.alpha <= 0) {
-                    if (splatter.parent) {
-                        this.app.stage.removeChild(splatter);
+                // Update blood splatter effects
+                for (let i = this.bloodSplatterEffects.length - 1; i >= 0; i--) {
+                    const splatter = this.bloodSplatterEffects[i];
+                    splatter.update(delta);
+                    if (splatter.splatters.length === 0) {
+                        this.bloodSplatterEffects.splice(i, 1);
                     }
-                    this.cameraBloodSplatterEffects.splice(i, 1);
                 }
+
+                // Update camera blood splatter effects
+                for (let i = this.cameraBloodSplatterEffects.length - 1; i >= 0; i--) {
+                    const splatter = this.cameraBloodSplatterEffects[i];
+                    splatter.alpha -= splatter.fadeSpeed * delta;
+                    if (splatter.alpha <= 0) {
+                        if (splatter.parent) {
+                            this.app.stage.removeChild(splatter);
+                        }
+                        this.cameraBloodSplatterEffects.splice(i, 1);
+                    }
+                }
+                this.updateWorldPosition();
+                this.updateSpriteZOrder();
             }
-            this.updateWorldPosition();
-            this.updateSpriteZOrder();
         });
 
         // Добавляем обработчик изменения размера окна
         window.addEventListener('resize', () => {
             this.drawScene();
         });
+    }
+
+    createPauseButton() {
+        // Create pause button
+        const pauseButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/pause.png'));
+        pauseButton.anchor.set(0.5);
+        pauseButton.scale.set(0.3);
+        pauseButton.x = this.app.screen.width - 120;
+        pauseButton.y = this.app.screen.height - 150;
+        pauseButton.interactive = true;
+        pauseButton.buttonMode = true;
+        pauseButton.visible = false; // Initially hidden
+
+        // Add hover effects
+        pauseButton.on('pointerover', () => {
+            pauseButton.scale.set(0.33);
+            pauseButton.tint = 0xDDDDDD;
+        });
+        pauseButton.on('pointerout', () => {
+            pauseButton.scale.set(0.3);
+            pauseButton.tint = 0xFFFFFF;
+        });
+
+        pauseButton.on('pointerdown', () => {
+            this.togglePause();
+        });
+
+        this.app.stage.addChild(pauseButton);
+        this.pauseButton = pauseButton;
+    }
+
+    createPausePanel() {
+        // Create pause panel container
+        const pausePanel = new PIXI.Container();
+
+        // Create background panel
+        const panelBg = new PIXI.Sprite(PIXI.Texture.from('assets/hud/pausedPanel.png'));
+        panelBg.anchor.set(0.5);
+        panelBg.x = this.app.screen.width / 2;
+        panelBg.y = this.app.screen.height / 2;
+        panelBg.scale.set(0.6);
+        pausePanel.addChild(panelBg);
+
+        // Create sound button
+        const soundButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/soundOn.png'));
+        soundButton.anchor.set(0.5);
+        soundButton.x = this.app.screen.width / 2 - 160;
+        soundButton.y = this.app.screen.height / 2;
+        soundButton.scale.set(0.32);
+        soundButton.interactive = true;
+        soundButton.buttonMode = true;
+
+        // Add hover effects
+        soundButton.on('pointerover', () => {
+            soundButton.scale.set(0.35);
+            soundButton.tint = 0xDDDDDD;
+        });
+        soundButton.on('pointerout', () => {
+            soundButton.scale.set(0.32);
+            soundButton.tint = 0xFFFFFF;
+        });
+
+        // Add click handler to toggle sound button texture
+        soundButton.on('pointerdown', () => {
+            const currentTexture = soundButton.texture;
+            if (currentTexture === PIXI.Texture.from('assets/hud/soundOn.png')) {
+                soundButton.texture = PIXI.Texture.from('assets/hud/soundOff.png');
+            } else {
+                soundButton.texture = PIXI.Texture.from('assets/hud/soundOn.png');
+            }
+        });
+
+        pausePanel.addChild(soundButton);
+
+        // Create continue button
+        const continueButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/ContinuePlay.png'));
+        continueButton.anchor.set(0.5);
+        continueButton.x = this.app.screen.width / 2;
+        continueButton.y = this.app.screen.height / 2;
+        continueButton.scale.set(0.32);
+        continueButton.interactive = true;
+        continueButton.buttonMode = true;
+
+        // Add hover effects
+        continueButton.on('pointerover', () => {
+            continueButton.scale.set(0.35);
+            continueButton.tint = 0xDDDDDD;
+        });
+        continueButton.on('pointerout', () => {
+            continueButton.scale.set(0.32);
+            continueButton.tint = 0xFFFFFF;
+        });
+
+        continueButton.on('pointerdown', () => {
+            this.togglePause();
+        });
+        pausePanel.addChild(continueButton);
+
+        // Create restart button
+        const restartButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/RestartPlay.png'));
+        restartButton.anchor.set(0.5);
+        restartButton.x = this.app.screen.width / 2 + 160;
+        restartButton.y = this.app.screen.height / 2;
+        restartButton.scale.set(0.32);
+        restartButton.interactive = true;
+        restartButton.buttonMode = true;
+
+        // Add hover effects
+        restartButton.on('pointerover', () => {
+            restartButton.scale.set(0.35);
+            restartButton.tint = 0xDDDDDD;
+        });
+        restartButton.on('pointerout', () => {
+            restartButton.scale.set(0.32);
+            restartButton.tint = 0xFFFFFF;
+        });
+
+        restartButton.on('pointerdown', () => {
+            window.location.reload();
+        });
+        pausePanel.addChild(restartButton);
+
+        this.app.stage.addChild(pausePanel);
+        this.pausePanel = pausePanel;
+        pausePanel.visible = false;
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+
+        if (!this.pausePanel) {
+            this.createPausePanel();
+        }
+
+        this.pausePanel.visible = this.isPaused;
+        this.pauseButton.visible = !this.isPaused;
     }
 
     initializeLayers() {
@@ -101,8 +243,8 @@ export class SceneManager {
         };
 
         // Проверяем основные текстуры
-        const hasBasicTextures = checkTexture('bg.png') && 
-                               checkTexture('soil.png') && 
+        const hasBasicTextures = checkTexture('bg.png') &&
+                               checkTexture('soil.png') &&
                                checkTexture('grass.png');
 
         if (!hasBasicTextures) {
@@ -128,6 +270,11 @@ export class SceneManager {
     }
 
     updateWorldPosition() {
+        // Show pause button when camera starts moving
+        if (this.camera.currentX > 0 && !this.pauseButton.visible) {
+            this.pauseButton.visible = true;
+        }
+
         // Обновляем позицию всех слоев относительно камеры
         Object.values(this.layers).forEach(layer => {
             if (layer.updatePosition) {
@@ -145,7 +292,7 @@ export class SceneManager {
         // Временно, чтобы решить проблему с дублированием, будем очищать все слои
         // и перерисовывать их, но оставим кролика и докторов.
         // Нам нужно убедиться, что слои могут корректно удалять свои предыдущие отрисовки.
-        
+
         // Обновляем слои
         this.layers.background.draw(this.worldContainer);
         this.layers.backFoliage.draw(this.worldContainer);
@@ -232,8 +379,8 @@ export class SceneManager {
 
         if (splatterTextureName === 'blood_spatter_1.png') {
             // Position for blood_spatter_1.png (bottom-left corner)
-            splatter.x = this.app.screen.width * 0.2; 
-            splatter.y = this.app.screen.height * 0.8; 
+            splatter.x = this.app.screen.width * 0.2;
+            splatter.y = this.app.screen.height * 0.8;
         } else {
             // Randomly position on left or right side of the screen for other splatters
             if (Math.random() < 0.5) {
