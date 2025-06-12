@@ -397,4 +397,86 @@ export class SceneManager {
         this.cameraBloodSplatterEffects.push(splatter);
         this.app.stage.addChild(splatter);
     }
+
+    showPausePanel() {
+        if (!this.pausePanel) {
+            this.pausePanel = new PIXI.Container();
+            this.pausePanel.alpha = 0;
+            this.pausePanel.scale.set(0.1); // Начинаем с очень маленького размера
+            this.pausePanel.x = this.app.screen.width / 2;
+            this.pausePanel.y = this.app.screen.height / 2;
+            this.pausePanel.pivot.set(0.5);
+            this.app.stage.addChild(this.pausePanel);
+
+            const panel = new PIXI.Sprite(this.resources.textures['rules_of_the_game.png']);
+            panel.anchor.set(0.5);
+            this.pausePanel.addChild(panel);
+
+            const continueButton = new PIXI.Sprite(this.resources.textures['3_ready.png']);
+            continueButton.anchor.set(0.5);
+            continueButton.x = 0;
+            continueButton.y = 100;
+            continueButton.scale.set(0.2);
+            continueButton.eventMode = 'static';
+            continueButton.cursor = 'pointer';
+            continueButton.on('pointerdown', () => {
+                this.hidePausePanel();
+                this.isPaused = false;
+            });
+            this.pausePanel.addChild(continueButton);
+
+            const restartButton = new PIXI.Sprite(this.resources.textures['2_set.png']);
+            restartButton.anchor.set(0.5);
+            restartButton.x = 0;
+            restartButton.y = 200;
+            restartButton.scale.set(0.2);
+            restartButton.eventMode = 'static';
+            restartButton.cursor = 'pointer';
+            restartButton.on('pointerdown', () => {
+                window.location.reload();
+            });
+            this.pausePanel.addChild(restartButton);
+        }
+
+        this.pausePanel.visible = true;
+        this.isPaused = true;
+
+        // Анимация появления
+        const duration = 1200; // Увеличиваем длительность для более плавной анимации
+        const startTime = Date.now();
+        const startScale = 0.1; // Начинаем с очень маленького размера
+        const endScale = 0.4; // Увеличиваем конечный размер
+        const startAlpha = 0;
+        const endAlpha = 1;
+
+        const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Используем более плавную функцию для масштабирования
+            const scale = startScale + (endScale - startScale) * this.easeOutElastic(progress);
+            const alpha = startAlpha + (endAlpha - startAlpha) * this.easeOutQuad(progress);
+
+            this.pausePanel.scale.set(scale);
+            this.pausePanel.alpha = alpha;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }
+
+    // Функция для эластичного эффекта
+    easeOutElastic(x) {
+        const c4 = (2 * Math.PI) / 3;
+        return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+    }
+
+    // Функция для плавного появления
+    easeOutQuad(x) {
+        return 1 - (1 - x) * (1 - x);
+    }
 }

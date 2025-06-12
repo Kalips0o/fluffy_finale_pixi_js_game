@@ -238,11 +238,47 @@ export class RabbitAnimations {
         gameOverSprite.anchor.set(0.5);
         gameOverSprite.x = this.rabbit.app.screen.width / 2;
         gameOverSprite.y = this.rabbit.app.screen.height / 2;
-        gameOverSprite.scale.set(0.35);
+        gameOverSprite.scale.set(0.2);
+        gameOverSprite.alpha = 0;
         gameOverSprite.eventMode = 'static';
         this.rabbit.app.stage.addChild(gameOverSprite);
+
+        const duration = 1000;
+        const startTime = Date.now();
+        const startScale = 0.2;
+        const endScale = 0.35;
+        const startAlpha = 0;
+        const endAlpha = 1;
+
+        const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const scale = startScale + (endScale - startScale) * this.easeOutBack(progress);
+            const alpha = startAlpha + (endAlpha - startAlpha) * this.easeOutQuad(progress);
+
+            gameOverSprite.scale.set(scale);
+            gameOverSprite.alpha = alpha;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        requestAnimationFrame(animate);
         gameOverSprite.on('pointerdown', () => {
             window.location.reload();
         });
+    }
+
+    easeOutBack(x) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    easeOutQuad(x) {
+        return 1 - (1 - x) * (1 - x);
     }
 }
