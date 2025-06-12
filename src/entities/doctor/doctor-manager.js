@@ -148,6 +148,9 @@ export class DoctorManager {
         }
         
         console.log('Regular collision detected, triggering game over');
+        // Make the doctor smile and face right
+        doctor.startSmiling();
+        
         // Immediately stop rabbit movement and change texture
         rabbit.physics.speed = 0;
         rabbit.physics.isJumping = false;

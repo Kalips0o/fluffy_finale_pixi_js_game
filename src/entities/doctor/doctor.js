@@ -12,15 +12,16 @@ export class Doctor {
         this.animationTime = 0;
         this.currentFrame = 0;
         this.frames = ['doctor_1.png', 'doctor_2.png', 'doctor_3.png'];
-        
+        this.isSmiling = false;
+
         // Добавляем параметры для движения
-        this.speed = 0.3; // Уменьшаем скорость с 1 до 0.5
+        this.speed = 0.3;
         this.direction = -1; // Начинаем движение влево
         this.startX = x;
         this.walkDistance = 100; // Расстояние, которое доктор проходит в одну сторону
-        
+
         this.sceneManager = sceneManager;
-        
+
         this.init();
     }
 
@@ -33,7 +34,7 @@ export class Doctor {
         this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
         this.sprite.x = this.x;
         this.sprite.y = this.y + 5; // Опускаем доктора на 20 пикселей ниже
-        
+
         // Создаем хитбокс
         this.hitbox = new PIXI.Rectangle(
             this.sprite.x - this.sprite.width * 0.25,
@@ -46,27 +47,42 @@ export class Doctor {
     update(delta) {
         if (!this.isActive) return;
 
-        // Обновляем анимацию
-        this.animationTime += delta;
-        if (this.animationTime >= this.animationSpeed) {
-            this.animationTime = 0;
-            this.currentFrame = (this.currentFrame + 1) % this.frames.length;
-            this.sprite.texture = this.resources.textures[this.frames[this.currentFrame]];
-        }
+        // Если доктор улыбается, не обновляем анимацию
+        if (!this.isSmiling) {
+            // Обновляем анимацию
+            this.animationTime += delta;
+            if (this.animationTime >= this.animationSpeed) {
+                this.animationTime = 0;
+                this.currentFrame = (this.currentFrame + 1) % this.frames.length;
+                this.sprite.texture = this.resources.textures[this.frames[this.currentFrame]];
+            }
 
-        // Обновляем движение
-        this.sprite.x += this.speed * this.direction * delta;
-        
-        // Проверяем, не вышел ли доктор за пределы своей зоны патрулирования
-        if (Math.abs(this.sprite.x - this.startX) >= this.walkDistance) {
-            this.direction *= -1; // Разворачиваемся
-            // Обновляем отражение спрайта в зависимости от нового направления
-            this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
+            // Обновляем движение
+            this.sprite.x += this.speed * this.direction * delta;
+
+            // Проверяем, не вышел ли доктор за пределы своей зоны патрулирования
+            if (Math.abs(this.sprite.x - this.startX) >= this.walkDistance) {
+                this.direction *= -1; // Разворачиваемся
+                // Обновляем отражение спрайта в зависимости от нового направления
+                this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
+            }
         }
 
         // Обновляем хитбокс
         this.hitbox.x = this.sprite.x - this.sprite.width * 0.25;
         this.hitbox.y = this.sprite.y - this.sprite.height * 0.25;
+    }
+
+    startSmiling() {
+        // Сначала поворачиваемся в сторону падения кролика
+        this.direction = this.sceneManager.rabbit.direction;
+        this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : Math.abs(this.sprite.scale.x);
+
+        // Добавляем задержку перед показом улыбки
+        setTimeout(() => {
+            this.isSmiling = true;
+            this.sprite.texture = this.resources.textures['doctor_smiling.png'];
+        }, 500); // 500мс задержка
     }
 
     checkCollision(rabbit) {
@@ -88,7 +104,7 @@ export class Doctor {
 
             // Make doctor sprite invisible immediately
             this.sprite.visible = false;
-            
+
             // Remove the sprite after a short delay to ensure blood effect is visible
             setTimeout(() => {
                 if (this.sprite && this.sprite.parent) {
@@ -99,4 +115,4 @@ export class Doctor {
         this.sprite = null;
         this.hitbox = null;
     }
-} 
+}
