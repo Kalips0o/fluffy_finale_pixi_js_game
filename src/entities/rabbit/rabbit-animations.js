@@ -1,4 +1,5 @@
 import { HammerAnimation } from '../effects/HammerAnimation';
+import { DustAnimation } from '../effects/DustAnimation';
 
 export class RabbitAnimations {
     constructor(rabbit, resources, app, worldContainer) {
@@ -9,6 +10,7 @@ export class RabbitAnimations {
         this.animationFrame = 0;
         this.animationTime = 0;
         this.hammerAnimation = new HammerAnimation(app, resources, worldContainer);
+        this.dustAnimation = new DustAnimation(app, resources, worldContainer);
 
         this.animationSpeeds = {
             run: 1.4,
@@ -151,6 +153,7 @@ export class RabbitAnimations {
         }
 
         let lastBounceY = null;
+        let lastBounceTime = startTime;
 
         const animate = () => {
             const currentTime = Date.now();
@@ -171,6 +174,16 @@ export class RabbitAnimations {
                 this.rabbit.sprite.x = current.x + (next.x - current.x) * bounceFraction;
                 this.rabbit.sprite.y = newY;
                 this.rabbit.sprite.rotation = current.rotation + (next.rotation - current.rotation) * bounceFraction;
+                
+                // Создаем эффект пыли при отскоке
+                if (lastBounceY !== null && newY > lastBounceY && currentTime - lastBounceTime > 150) {
+                    this.dustAnimation.createDustEffect(
+                        this.rabbit.sprite.x,
+                        this.rabbit.sprite.y + 20,
+                        Math.PI * 0.5
+                    );
+                    lastBounceTime = currentTime;
+                }
                 lastBounceY = newY;
             } else {
                 const finalProgress = (progress - (bounces.length - 1) / bounces.length) * bounces.length;
@@ -195,6 +208,7 @@ export class RabbitAnimations {
             }
 
             this.rabbit.sprite.texture = this.resources.textures['rabbit_fell_2.png'];
+            this.dustAnimation.update();
 
             if (progress < 1) {
                 requestAnimationFrame(animate);
