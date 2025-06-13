@@ -7,17 +7,17 @@ export class RabbitPhysics {
         this.speed = 5;
         this.isJumping = false;
         this.isHitting = false;
-        
+
         // Параметры для прыжка
         this.jumpPower = -70;
         this.jumpGravity = 0.35;
         this.jumpForwardSpeed = 10;
-        
+
         // Параметры для удара
         this.hitJumpPower = -25;
         this.hitGravity = 0.6;
         this.hitForwardSpeed = 2;
-        
+
         this.jumpVelocity = 0;
         this.hitLanding = false;
         this.hitDoctor = false;
@@ -194,7 +194,7 @@ export class RabbitPhysics {
             } else {
                 this.rabbit.animations.stop();
             }
-        }, 700);
+        }, 50);
     }
 
     handleRegularLanding() {

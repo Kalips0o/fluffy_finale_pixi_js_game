@@ -9,7 +9,9 @@ export class DoctorManager {
         this.doctors = [];
         this.spawnInterval = 5000; // Интервал появления докторов (в миллисекундах)
         this.lastSpawnTime = 0;
-        this.minSpawnDistance = 1000; // Минимальное расстояние между докторами
+        this.minSpawnDistance = 2000; // Увеличиваем минимальное расстояние между докторами
+        this.spawnDistanceVariation = 1000; // Добавляем вариацию расстояния
+        this.verticalVariation = 30; // Добавляем вариацию по вертикали
 
         // Создаем контейнер для отладочной графики
         this.debugContainer = new PIXI.Container();
@@ -33,10 +35,13 @@ export class DoctorManager {
             if (distance < this.minSpawnDistance) return;
         }
 
-        // Создаем нового доктора
-        const worldX = this.sceneManager.camera.getWorldPosition(this.app.screen.width + 100);
+        // Создаем нового доктора с случайным смещением
+        const baseWorldX = this.sceneManager.camera.getWorldPosition(this.app.screen.width + 100);
+        const randomDistance = Math.random() * this.spawnDistanceVariation;
+        const worldX = baseWorldX + randomDistance;
         const grassY = this.getGrassY();
-        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 50, this.sceneManager);
+        const verticalOffset = (Math.random() - 0.5) * this.verticalVariation;
+        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 50 + verticalOffset, this.sceneManager);
         
         // Добавляем доктора в контейнер мира
         this.sceneManager.worldContainer.addChild(doctor.sprite);

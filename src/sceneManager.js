@@ -8,6 +8,7 @@ import { Trees } from './layers/trees';
 import { Rabbit } from './entities/rabbit/rabbit';
 import { Camera } from './camera';
 import { DoctorManager } from './entities/doctor/doctor-manager';
+import { VaccineManager } from './entities/vaccine/vaccine-manager';
 import { BloodSplatter } from './entities/effects/BloodSplatter';
 
 export class SceneManager {
@@ -33,6 +34,11 @@ export class SceneManager {
         // Создаем менеджер докторов
         this.doctorManager = new DoctorManager(app, resources, this);
         this.doctorManager.init();
+
+        // Создаем менеджер вакцин
+        this.vaccineManager = new VaccineManager(app, resources, this);
+        this.vaccineManager.init();
+
         this.bloodSplatterEffects = [];
         this.cameraBloodSplatterEffects = []; // New array for camera blood splatters
         if (this.doctorManager) {
@@ -64,6 +70,7 @@ export class SceneManager {
                 this.rabbit.update(delta);
                 this.camera.update();
                 this.doctorManager.update(delta);
+                this.vaccineManager.update(delta);
 
                 // Update blood splatter effects
                 for (let i = this.bloodSplatterEffects.length - 1; i >= 0; i--) {
@@ -478,5 +485,65 @@ export class SceneManager {
     // Функция для плавного появления
     easeOutQuad(x) {
         return 1 - (1 - x) * (1 - x);
+    }
+
+    update(delta) {
+        if (this.isPaused) return;
+
+        // Обновляем камеру
+        this.camera.update(delta);
+
+        // Обновляем все слои
+        Object.values(this.layers).forEach(layer => layer.updatePosition(this.camera));
+
+        // Обновляем кролика
+        this.rabbit.update(delta);
+
+        // Обновляем докторов
+        if (this.doctorManager) {
+            this.doctorManager.update(delta);
+        }
+
+        // Обновляем вакцины
+        if (this.vaccineManager) {
+            this.vaccineManager.update(delta);
+        }
+
+        // Обновляем эффекты крови
+        this.updateBloodSplatters(delta);
+        this.updateCameraBloodSplatters(delta);
+
+        // Обновляем z-порядок спрайтов
+        this.updateSpriteZOrder();
+    }
+
+    cleanup() {
+        // Очищаем все слои
+        Object.values(this.layers).forEach(layer => {
+            if (layer.cleanup) {
+                layer.cleanup();
+            }
+        });
+
+        // Очищаем докторов
+        if (this.doctorManager) {
+            this.doctorManager.cleanup();
+        }
+
+        // Очищаем вакцины
+        if (this.vaccineManager) {
+            this.vaccineManager.cleanup();
+        }
+
+        // Очищаем эффекты крови
+        this.bloodSplatterEffects.forEach(effect => effect.cleanup());
+        this.bloodSplatterEffects = [];
+        this.cameraBloodSplatterEffects.forEach(effect => effect.cleanup());
+        this.cameraBloodSplatterEffects = [];
+
+        // Очищаем кролика
+        if (this.rabbit) {
+            this.rabbit.cleanup();
+        }
     }
 }
