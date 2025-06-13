@@ -81,8 +81,6 @@ export class DoctorManager {
             // Обновляем графику отладки
             if (doctor.debugGraphics) {
                 doctor.debugGraphics.clear();
-                doctor.debugGraphics.lineStyle(2, 0x00FF00);
-                doctor.debugGraphics.drawRect(doctor.hitbox.x, doctor.hitbox.y, doctor.hitbox.width, doctor.hitbox.height);
             }
             
             // Проверяем столкновение с кроликом только если доктор активен
