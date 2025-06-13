@@ -9,6 +9,7 @@ import { Rabbit } from './entities/rabbit/rabbit';
 import { Camera } from './camera';
 import { DoctorManager } from './entities/doctor/doctor-manager';
 import { VaccineManager } from './entities/vaccine/vaccine-manager';
+import { VirusManager } from './entities/virus/virus-manager';
 import { BloodSplatter } from './entities/effects/BloodSplatter';
 
 export class SceneManager {
@@ -38,6 +39,10 @@ export class SceneManager {
         // Создаем менеджер вакцин
         this.vaccineManager = new VaccineManager(app, this.worldContainer, this);
         this.vaccineManager.init();
+
+        // Создаем менеджер вирусов
+        this.virusManager = new VirusManager(app, this.worldContainer, this);
+        this.virusManager.init();
 
         this.bloodSplatterEffects = [];
         this.cameraBloodSplatterEffects = []; // New array for camera blood splatters
@@ -71,6 +76,7 @@ export class SceneManager {
                 this.camera.update();
                 this.doctorManager.update(delta);
                 this.vaccineManager.update(delta);
+                this.virusManager.update(delta);
 
                 // Update blood splatter effects
                 for (let i = this.bloodSplatterEffects.length - 1; i >= 0; i--) {
@@ -509,6 +515,11 @@ export class SceneManager {
             this.vaccineManager.update(delta);
         }
 
+        // Обновляем вирусы
+        if (this.virusManager) {
+            this.virusManager.update(delta);
+        }
+
         // Обновляем эффекты крови
         this.updateBloodSplatters(delta);
         this.updateCameraBloodSplatters(delta);
@@ -533,6 +544,11 @@ export class SceneManager {
         // Очищаем вакцины
         if (this.vaccineManager) {
             this.vaccineManager.cleanup();
+        }
+
+        // Очищаем вирусы
+        if (this.virusManager) {
+            this.virusManager.cleanup();
         }
 
         // Очищаем эффекты крови
