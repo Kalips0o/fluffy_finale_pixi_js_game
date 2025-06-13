@@ -127,7 +127,7 @@ export class RabbitAnimations {
         }
     }
 
-    playFallingAnimation() {
+    playFallingAnimation(isVaccineExplosion = false) {
         // Скрываем кнопку паузы в начале падения
         if (this.sceneManager && this.sceneManager.pauseButton) {
             console.log('Hiding pause button at start of falling');
@@ -142,13 +142,26 @@ export class RabbitAnimations {
         const direction = this.rabbit.direction;
         const groundY = this.rabbit.physics.getGrassY();
 
-        const bounces = [
-            { x: startX + direction * 150, y: groundY - 20, rotation: Math.PI * 0.5 },
-            { x: startX + direction * 280, y: groundY - 20, rotation: Math.PI * 1.2 },
-            { x: startX + direction * 480, y: groundY + 30, rotation: Math.PI * 1.7 }
-        ];
+        let bounces;
+        if (isVaccineExplosion) {
+            // Анимация падения после взрыва вакцины
+            bounces = [
+                { x: startX + direction * 100, y: groundY - 50, rotation: Math.PI * 0.8 },
+                { x: startX + direction * 200, y: groundY - 30, rotation: Math.PI * 1.5 },
+                { x: startX + direction * 300, y: groundY - 20, rotation: Math.PI * 2.2 },
+                { x: startX + direction * 400, y: groundY - 10, rotation: Math.PI * 2.8 },
+                { x: startX + direction * 500, y: groundY + 20, rotation: Math.PI * 3.5 }
+            ];
+        } else {
+            // Обычная анимация падения
+            bounces = [
+                { x: startX + direction * 150, y: groundY - 20, rotation: Math.PI * 0.5 },
+                { x: startX + direction * 280, y: groundY - 20, rotation: Math.PI * 1.2 },
+                { x: startX + direction * 480, y: groundY + 30, rotation: Math.PI * 1.7 }
+            ];
+        }
 
-        const duration = 2500;
+        const duration = isVaccineExplosion ? 3000 : 2500; // Увеличиваем длительность для взрыва
         const startTime = Date.now();
 
         if (this.rabbit.sprite.parent) {
@@ -179,7 +192,7 @@ export class RabbitAnimations {
             const next = bounces[Math.min(currentBounce + 1, bounces.length - 1)];
 
             if (currentBounce < bounces.length - 1) {
-                const height = 50 * Math.sin(bounceFraction * Math.PI);
+                const height = isVaccineExplosion ? 70 * Math.sin(bounceFraction * Math.PI) : 50 * Math.sin(bounceFraction * Math.PI);
                 const newY = current.y + (next.y - current.y) * bounceFraction - height;
 
                 this.rabbit.sprite.x = current.x + (next.x - current.x) * bounceFraction;
@@ -200,7 +213,7 @@ export class RabbitAnimations {
                 const finalProgress = (progress - (bounces.length - 1) / bounces.length) * bounces.length;
 
                 if (finalProgress < 0.5) {
-                    const jumpHeight = 100 * Math.sin(finalProgress * Math.PI);
+                    const jumpHeight = isVaccineExplosion ? 120 * Math.sin(finalProgress * Math.PI) : 100 * Math.sin(finalProgress * Math.PI);
                     const newY = next.y - jumpHeight;
 
                     this.rabbit.sprite.x = next.x;
@@ -209,7 +222,7 @@ export class RabbitAnimations {
                     lastBounceY = newY;
                 } else {
                     const behindProgress = (finalProgress - 0.5) * 2;
-                    const newY = groundY + (100 * behindProgress);
+                    const newY = groundY + (isVaccineExplosion ? 150 * behindProgress : 100 * behindProgress);
 
                     this.rabbit.sprite.x = next.x;
                     this.rabbit.sprite.y = newY;

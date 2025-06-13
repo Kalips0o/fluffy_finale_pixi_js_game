@@ -36,7 +36,7 @@ export class SceneManager {
         this.doctorManager.init();
 
         // Создаем менеджер вакцин
-        this.vaccineManager = new VaccineManager(app, resources, this);
+        this.vaccineManager = new VaccineManager(app, this.worldContainer, this);
         this.vaccineManager.init();
 
         this.bloodSplatterEffects = [];

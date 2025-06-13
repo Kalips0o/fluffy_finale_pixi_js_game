@@ -35,7 +35,11 @@ export async function loadAssets() {
             'doctor_1.png',
             'hammer.png',
             'dust_clouds.png',
-            'game-over.png'
+            'game-over.png',
+            'vaccine-top-part.png',
+            'vaccine-lower-part.png',
+            'fragment__vaccine_1.png',
+            'fragment__vaccine_2.png'
         ];
 
         // Создаем текстуры из спрайт-листов

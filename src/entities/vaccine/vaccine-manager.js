@@ -1,11 +1,13 @@
 import * as PIXI from 'pixi.js';
 import { Vaccine } from './vaccine';
+import { VaccineExplosion } from '../effects/VaccineExplosion';
 
 export class VaccineManager {
-    constructor(app, resources, sceneManager) {
+    constructor(app, worldContainer, sceneManager) {
         this.app = app;
-        this.resources = resources;
+        this.worldContainer = sceneManager.worldContainer;
         this.sceneManager = sceneManager;
+        this.resources = sceneManager.resources;
         this.vaccines = [];
         this.spawnInterval = 2500; // Уменьшаем интервал появления вакцин с 4000 до 2500 мс
         this.lastSpawnTime = 0;
@@ -13,10 +15,12 @@ export class VaccineManager {
         this.spawnDistanceVariation = 800; // Вариация расстояния
         this.verticalVariation = 200; // Вариация по вертикали
         this.minDistanceFromDoctor = 1000; // Минимальное расстояние от докторов
+        this.vaccineExplosion = new VaccineExplosion(app, this.worldContainer);
+        console.log('VaccineExplosion initialized:', this.vaccineExplosion);
 
         // Создаем контейнер для отладочной графики
         this.debugContainer = new PIXI.Container();
-        this.sceneManager.worldContainer.addChild(this.debugContainer);
+        this.worldContainer.addChild(this.debugContainer);
     }
 
     init() {
@@ -54,7 +58,7 @@ export class VaccineManager {
             -Math.random() * this.verticalVariation : // В воздухе
             Math.random() * 20 - 30; // На земле, но не прижимаем к ней (от -30 до -10)
 
-        const vaccine = new Vaccine(this.app, this.resources, baseWorldX, grassY - 50 + verticalOffset, this.sceneManager);
+        const vaccine = new Vaccine(this.app, this.resources, baseWorldX, grassY + verticalOffset, this.sceneManager);
         
         // Добавляем вакцину в контейнер мира
         this.sceneManager.worldContainer.addChild(vaccine.sprite);
@@ -113,7 +117,7 @@ export class VaccineManager {
 
                     if (hitCollision) {
                         console.log('Vaccine hit collision detected!');
-                        this.handleHitCollision(vaccine);
+                        this.handleHitCollision(vaccine, rabbit);
                         return false;
                     }
                 }
@@ -132,61 +136,30 @@ export class VaccineManager {
 
                 if (regularCollision) {
                     console.log('Vaccine regular collision detected!');
-                    this.handleCollision(vaccine);
+                    this.handleCollision(vaccine, rabbit);
                     return false;
                 }
             }
             
-            return vaccine.isActive;
+            return true;
         });
     }
 
-    handleHitCollision(vaccine) {
-        // Добавляем эффект крови при ударе
+    handleHitCollision(vaccine, rabbit) {
+        if (vaccine.isHit) return;
+        vaccine.isHit = true;
+        vaccine.sprite.visible = false;
+        this.vaccineExplosion.createExplosion(vaccine.sprite.x, vaccine.sprite.y, vaccine.sprite);
         this.sceneManager.addCameraBloodSplatter();
-        vaccine.deactivate();
+        this.sceneManager.rabbit.animations.playFallingAnimation(true); // Добавляем параметр true для взрыва
     }
 
-    handleCollision(vaccine) {
-        const rabbit = this.sceneManager.rabbit;
-        
-        // If rabbit is hitting, deactivate the vaccine and show blood splatter
-        if (rabbit.physics.hitActive) {
-            this.sceneManager.addCameraBloodSplatter(); // Add blood splatter to camera when hitting
-            vaccine.deactivate();
-            return;
-        }
-        
-        console.log('Regular collision detected, triggering game over');
-        // Make the vaccine smile
-        vaccine.startSmiling();
-        
-        // Immediately stop rabbit movement and change texture
-        rabbit.physics.speed = 0;
-        rabbit.physics.isJumping = false;
-        rabbit.physics.isHitting = false;
-        rabbit.physics.gameOver = true;
-        
-        // Stop any current animations
-        if (rabbit.animations) {
-            rabbit.animations.stop();
-        }
-        
-        // Disable controls
-        if (rabbit.controls) {
-            rabbit.controls.disable();
-        }
-
-        // Скрываем кнопку паузы и панель паузы
-        if (this.sceneManager.pauseButton) {
-            this.sceneManager.pauseButton.visible = false;
-        }
-        if (this.sceneManager.pausePanel) {
-            this.sceneManager.pausePanel.visible = false;
-        }
-        
-        // Start falling animation
-        rabbit.animations.play('falling');
+    handleCollision(vaccine, rabbit) {
+        if (vaccine.isHit) return;
+        vaccine.isHit = true;
+        vaccine.sprite.visible = false;
+        this.vaccineExplosion.createExplosion(vaccine.sprite.x, vaccine.sprite.y, vaccine.sprite);
+        this.sceneManager.rabbit.animations.playFallingAnimation(true); // Добавляем параметр true для взрыва
     }
 
     cleanup() {
