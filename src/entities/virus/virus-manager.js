@@ -8,28 +8,25 @@ export class VirusManager {
         this.sceneManager = sceneManager;
         this.resources = sceneManager.resources;
         this.viruses = [];
-        this.spawnInterval = 800; // Уменьшаем интервал между волнами
+        this.spawnInterval = 2000; // Интервал между попытками спавна *нового* паттерна/линии
         this.lastSpawnTime = 0;
         this.minSpawnDistance = 200; // Уменьшаем расстояние между вирусами в волне
         this.spawnDistanceVariation = 100; // Уменьшаем вариацию для более плотных групп
-        this.verticalVariation = 100; // Уменьшаем вертикальную вариацию для более четких волн
+        this.verticalVariation = 80; // Небольшая вертикальная вариация внутри линии для естественности
         this.minDistanceFromDoctor = 500; // Минимальное расстояние от докторов
 
         // Параметры для волн вирусов
         this.patternIndex = 0;
         this.patterns = [
-            { count: 8, height: 0.3, spacing: 0.8 }, // Волна из 8 вирусов внизу
-            { count: 8, height: 0.4, spacing: 0.8 }, // Волна из 8 вирусов чуть выше
-            { count: 8, height: 0.5, spacing: 0.8 }, // Волна из 8 вирусов в середине
-            { count: 8, height: 0.6, spacing: 0.8 }, // Волна из 8 вирусов чуть ниже верхнего
-            { count: 8, height: 0.7, spacing: 0.8 }, // Волна из 8 вирусов вверху
-            { count: 6, height: 0.35, spacing: 1.0 }, // Волна из 6 вирусов между нижним и средним
-            { count: 6, height: 0.45, spacing: 1.0 }, // Волна из 6 вирусов между средним и верхним
-            { count: 6, height: 0.55, spacing: 1.0 }, // Волна из 6 вирусов в верхней части
-            { count: 6, height: 0.65, spacing: 1.0 }  // Волна из 6 вирусов в нижней части
+            { count: 5, height: 0.15, spacing: 150 },  // 5 вирусов низко
+            { count: 4, height: 0.25, spacing: 150 },  // 4 вируса чуть выше
+            { count: 5, height: 0.35, spacing: 150 },  // 5 вирусов на средней высоте
+            { count: 4, height: 0.45, spacing: 150 },  // 4 вируса выше среднего
+            { count: 5, height: 0.55, spacing: 150 }   // 5 вирусов на максимальной высоте
         ];
         this.virusesInCurrentPattern = 0;
-        this.waveSpacing = 0; // Текущее расстояние между вирусами в волне
+        this._currentPatternStartX = 0;
+        this._horizontalGapBetweenPatterns = 3000; // Увеличиваем отступ между группами для лучшей читаемости
 
         // Создаем контейнер для отладочной графики
         this.debugContainer = new PIXI.Container();
@@ -56,14 +53,10 @@ export class VirusManager {
         const worldX = this.sceneManager.camera.getWorldPosition(this.app.screen.width + 100);
         const currentPattern = this.patterns[this.patternIndex];
         
-        // Вычисляем позицию для нового вируса в волне
-        const baseWorldX = worldX + (this.waveSpacing * currentPattern.spacing);
-        this.waveSpacing += this.minSpawnDistance;
-        
         // Проверяем, нет ли докторов слишком близко
         const doctors = this.sceneManager.doctorManager.doctors;
         for (const doctor of doctors) {
-            if (Math.abs(baseWorldX - doctor.sprite.x) < this.minDistanceFromDoctor) {
+            if (Math.abs(worldX - doctor.sprite.x) < this.minDistanceFromDoctor) {
                 return; // Не спавним вирус, если слишком близко к доктору
             }
         }
@@ -73,34 +66,36 @@ export class VirusManager {
         const screenHeight = this.app.screen.height;
         const baseHeight = grassY - (screenHeight * currentPattern.height);
         
-        // Добавляем небольшое случайное отклонение по высоте
-        const heightVariation = (Math.random() - 0.5) * this.verticalVariation;
+        // Добавляем небольшое случайное отклонение по высоте для всей группы
+        const heightVariation = (Math.random() - 0.5) * 30; // Уменьшаем вариацию высоты
         const targetY = baseHeight + heightVariation;
 
-        // Выбираем случайную текстуру вируса
-        const virusNumber = Math.floor(Math.random() * 10) + 1; // От 1 до 10
-        const virusTexture = `vir_${virusNumber}.png`;
+        // Спавним группу вирусов на одном уровне
+        for (let i = 0; i < currentPattern.count; i++) {
+            const baseWorldX = worldX + (i * currentPattern.spacing);
+            
+            // Выбираем случайную текстуру вируса
+            const virusNumber = Math.floor(Math.random() * 10) + 1;
+            const virusTexture = `vir_${virusNumber}.png`;
 
-        const virus = new Virus(this.app, this.resources, baseWorldX, targetY, this.sceneManager, virusTexture);
-        
-        // Добавляем вирус в контейнер мира
-        this.sceneManager.worldContainer.addChild(virus.container);
-        
-        // Создаем и добавляем графику для отладки
-        virus.debugGraphics = new PIXI.Graphics();
-        this.debugContainer.addChild(virus.debugGraphics);
-        
-        this.viruses.push(virus);
+            const virus = new Virus(this.app, this.resources, baseWorldX, targetY, this.sceneManager, virusTexture);
+            
+            // Добавляем вирус в контейнер мира
+            this.sceneManager.worldContainer.addChild(virus.container);
+            
+            // Создаем и добавляем графику для отладки
+            virus.debugGraphics = new PIXI.Graphics();
+            this.debugContainer.addChild(virus.debugGraphics);
+            
+            this.viruses.push(virus);
+        }
+
         this.lastSpawnTime = currentTime;
 
-        // Обновляем счетчик вирусов в текущем паттерне
-        this.virusesInCurrentPattern++;
-        if (this.virusesInCurrentPattern >= currentPattern.count) {
-            // Переходим к следующему паттерну
-            this.patternIndex = (this.patternIndex + 1) % this.patterns.length;
-            this.virusesInCurrentPattern = 0;
-            this.waveSpacing = 0; // Сбрасываем расстояние для новой волны
-        }
+        // Переходим к следующему паттерну после создания всей группы
+        this.patternIndex = (this.patternIndex + 1) % this.patterns.length;
+        this.virusesInCurrentPattern = 0;
+        this._currentPatternStartX = 0;
     }
 
     getGrassY() {
