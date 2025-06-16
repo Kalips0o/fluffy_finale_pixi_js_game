@@ -128,13 +128,22 @@ export class RabbitAnimations {
     }
 
     playFallingAnimation(isVaccineExplosion = false) {
-        // Скрываем кнопку паузы в начале падения
+        // Скрываем кнопку паузы в начале падения и блокируем её
         if (this.sceneManager && this.sceneManager.pauseButton) {
             console.log('Hiding pause button at start of falling');
             this.sceneManager.pauseButton.visible = false;
+            this.sceneManager.pauseButton.eventMode = 'none'; // Отключаем взаимодействие с кнопкой
             if (this.sceneManager.pausePanel) {
                 this.sceneManager.pausePanel.visible = false;
             }
+        }
+
+        // Устанавливаем флаг game over в true
+        this.rabbit.physics.gameOver = true;
+        
+        // Отключаем управление
+        if (this.rabbit.controls) {
+            this.rabbit.controls.disable();
         }
 
         const startX = this.rabbit.sprite.x;

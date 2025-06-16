@@ -235,6 +235,9 @@ export class SceneManager {
     }
 
     togglePause() {
+        // Не позволяем ставить на паузу, если игра окончена
+        if (this.rabbit.physics.gameOver) return;
+        
         this.isPaused = !this.isPaused;
 
         if (!this.pausePanel) {
@@ -286,6 +289,7 @@ export class SceneManager {
         // Show pause button when camera starts moving and game is not over
         if (this.camera.currentX > 0 && !this.pauseButton.visible && !this.rabbit.physics.gameOver) {
             this.pauseButton.visible = true;
+            this.pauseButton.eventMode = 'static'; // Включаем взаимодействие с кнопкой
         }
 
         // Обновляем позицию всех слоев относительно камеры
