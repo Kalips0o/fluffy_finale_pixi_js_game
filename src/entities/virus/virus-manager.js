@@ -147,7 +147,8 @@ export class VirusManager {
 
                 if (collision) {
                     console.log('Virus collected!');
-                    this.handleCollection(virus, rabbit);
+                    this.handleCollection(virus, rabbit); // Восстанавливаем обработку сбора
+                    this.sceneManager.incrementVirusCount(); // Увеличиваем счетчик вирусов
                     return false;
                 }
             }
