@@ -38,7 +38,7 @@ export class UIManager {
 
     createPauseButton() {
         // Create pause button
-        const pauseButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/pause.png'));
+        const pauseButton = new PIXI.Sprite(PIXI.Texture.from('/assets/hud/pause.png'));
         pauseButton.anchor.set(0.5);
         pauseButton.scale.set(0.5); // Изначально уменьшена для анимации
         pauseButton.x = this.app.screen.width - 120;
@@ -71,7 +71,7 @@ export class UIManager {
         const pausePanel = new PIXI.Container();
 
         // Create background panel
-        const panelBg = new PIXI.Sprite(PIXI.Texture.from('assets/hud/pausedPanel.png'));
+        const panelBg = new PIXI.Sprite(PIXI.Texture.from('/assets/hud/pausedPanel.png'));
         panelBg.anchor.set(0.5);
         panelBg.x = this.app.screen.width / 2;
         panelBg.y = this.app.screen.height / 2;
@@ -79,7 +79,7 @@ export class UIManager {
         pausePanel.addChild(panelBg);
 
         // Create sound button
-        const soundButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/soundOn.png'));
+        const soundButton = new PIXI.Sprite(PIXI.Texture.from('/assets/hud/soundOn.png'));
         soundButton.anchor.set(0.5);
         soundButton.x = this.app.screen.width / 2 - 160;
         soundButton.y = this.app.screen.height / 2;
@@ -100,17 +100,17 @@ export class UIManager {
         // Add click handler to toggle sound button texture
         soundButton.on('pointerdown', () => {
             const currentTexture = soundButton.texture;
-            if (currentTexture === PIXI.Texture.from('assets/hud/soundOn.png')) {
-                soundButton.texture = PIXI.Texture.from('assets/hud/soundOff.png');
+            if (currentTexture === PIXI.Texture.from('/assets/hud/soundOn.png')) {
+                soundButton.texture = PIXI.Texture.from('/assets/hud/soundOff.png');
             } else {
-                soundButton.texture = PIXI.Texture.from('assets/hud/soundOn.png');
+                soundButton.texture = PIXI.Texture.from('/assets/hud/soundOn.png');
             }
         });
 
         pausePanel.addChild(soundButton);
 
         // Create continue button
-        const continueButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/ContinuePlay.png'));
+        const continueButton = new PIXI.Sprite(PIXI.Texture.from('/assets/hud/ContinuePlay.png'));
         continueButton.anchor.set(0.5);
         continueButton.x = this.app.screen.width / 2;
         continueButton.y = this.app.screen.height / 2;
@@ -135,7 +135,7 @@ export class UIManager {
         pausePanel.addChild(continueButton);
 
         // Create restart button
-        const restartButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/RestartPlay.png'));
+        const restartButton = new PIXI.Sprite(PIXI.Texture.from('/assets/hud/RestartPlay.png'));
         restartButton.anchor.set(0.5);
         restartButton.x = this.app.screen.width / 2 + 160;
         restartButton.y = this.app.screen.height / 2;

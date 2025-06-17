@@ -1,0 +1,423 @@
+{
+  "frames": {
+    "rabbit_is_standing_1.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 985,
+        "h": 1300
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 102,
+        "y": 0,
+        "w": 985,
+        "h": 1300
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "rabbit_is_standing_2.png": {
+      "frame": {
+        "x": 1300,
+        "y": 0,
+        "w": 985,
+        "h": 1300
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 102,
+        "y": 0,
+        "w": 985,
+        "h": 1300
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_hits_4.png": {
+      "frame": {
+        "x": 2600,
+        "y": 0,
+        "w": 1122,
+        "h": 1276
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 74,
+        "y": 15,
+        "w": 1122,
+        "h": 1276
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_jumping_3.png": {
+      "frame": {
+        "x": 3876,
+        "y": 0,
+        "w": 1016,
+        "h": 1271
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 167,
+        "y": 24,
+        "w": 1016,
+        "h": 1271
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_hits_the_ground.png": {
+      "frame": {
+        "x": 0,
+        "y": 985,
+        "w": 1122,
+        "h": 1276
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 74,
+        "y": 15,
+        "w": 1122,
+        "h": 1276
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_jumping_4.png": {
+      "frame": {
+        "x": 1276,
+        "y": 985,
+        "w": 1014,
+        "h": 1267
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 177,
+        "y": 5,
+        "w": 1014,
+        "h": 1267
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "rabbit_fell_1.png": {
+      "frame": {
+        "x": 2543,
+        "y": 1122,
+        "w": 1045,
+        "h": 1213
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 18,
+        "y": 39,
+        "w": 1045,
+        "h": 1213
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "rabbit_fell_2.png": {
+      "frame": {
+        "x": 3756,
+        "y": 1271,
+        "w": 945,
+        "h": 1133
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 29,
+        "y": 35,
+        "w": 945,
+        "h": 1133
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_hits_1.png": {
+      "frame": {
+        "x": 1276,
+        "y": 1999,
+        "w": 936,
+        "h": 1204
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 211,
+        "y": 21,
+        "w": 936,
+        "h": 1204
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_hits_2.png": {
+      "frame": {
+        "x": 0,
+        "y": 2167,
+        "w": 914,
+        "h": 1199
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 190,
+        "y": 77,
+        "w": 914,
+        "h": 1199
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_hits_3.png": {
+      "frame": {
+        "x": 2480,
+        "y": 2167,
+        "w": 1088,
+        "h": 1191
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 97,
+        "y": 62,
+        "w": 1088,
+        "h": 1191
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_jumping_2.png": {
+      "frame": {
+        "x": 3671,
+        "y": 2216,
+        "w": 1008,
+        "h": 1174
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 184,
+        "y": 54,
+        "w": 1008,
+        "h": 1174
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "bunny_jumping_1.png": {
+      "frame": {
+        "x": 3671,
+        "y": 3224,
+        "w": 974,
+        "h": 1132
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 206,
+        "y": 50,
+        "w": 974,
+        "h": 1132
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "run_rabbit_1.png": {
+      "frame": {
+        "x": 1199,
+        "y": 2935,
+        "w": 920,
+        "h": 991
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 125,
+        "y": 143,
+        "w": 920,
+        "h": 991
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "run_rabbit_2.png": {
+      "frame": {
+        "x": 1199,
+        "y": 3855,
+        "w": 945,
+        "h": 979
+      },
+      "rotated": false,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 122,
+        "y": 167,
+        "w": 945,
+        "h": 979
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "run_rabbit_3.png": {
+      "frame": {
+        "x": 2144,
+        "y": 3855,
+        "w": 972,
+        "h": 971
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 94,
+        "y": 168,
+        "w": 972,
+        "h": 971
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "run_rabbit_4.png": {
+      "frame": {
+        "x": 0,
+        "y": 3081,
+        "w": 945,
+        "h": 968
+      },
+      "rotated": true,
+      "trimmed": true,
+      "spriteSourceSize": {
+        "x": 122,
+        "y": 167,
+        "w": 945,
+        "h": 968
+      },
+      "sourceSize": {
+        "w": 1200,
+        "h": 1300
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "rabbit.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 4892,
+      "h": 4834
+    },
+    "scale": 1
+  }
+}

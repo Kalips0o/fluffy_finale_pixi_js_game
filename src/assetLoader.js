@@ -3,10 +3,10 @@ import * as PIXI from 'pixi.js';
 export async function loadAssets() {
     try {
         // Загружаем все необходимые ресурсы
-        const worldAssets = await PIXI.Assets.load('src/img/WorldAssets-hd.json');
-        const rabbitAssets = await PIXI.Assets.load('src/img/rabbit.json');
-        const obstaclesAssets = await PIXI.Assets.load('src/img/obstacles.json');
-        const loadingAssets = await PIXI.Assets.load('src/img/loading.json');
+        const worldAssets = await PIXI.Assets.load('/img/WorldAssets-hd.json');
+        const rabbitAssets = await PIXI.Assets.load('/img/rabbit.json');
+        const obstaclesAssets = await PIXI.Assets.load('/img/obstacles.json');
+        const loadingAssets = await PIXI.Assets.load('/img/loading.json');
         
         // Проверяем, что все необходимые текстуры загружены
         const requiredTextures = [
