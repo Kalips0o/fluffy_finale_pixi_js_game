@@ -17,7 +17,10 @@ export class SceneManager {
         this.app = app;
         this.resources = resources;
         this.isPaused = false;
+        this.isGameRunning = true;
+        this.countersShown = false; // Флаг для отслеживания показа счетчиков
         this.virusCount = 0; // Добавляем счетчик вирусов
+        this.bestScore = 0; // Лучший результат
 
         // Создаем контейнеры
         this.camera = new Camera(app);
@@ -117,12 +120,13 @@ export class SceneManager {
         // Create pause button
         const pauseButton = new PIXI.Sprite(PIXI.Texture.from('assets/hud/pause.png'));
         pauseButton.anchor.set(0.5);
-        pauseButton.scale.set(0.3);
+        pauseButton.scale.set(0.5); // Изначально уменьшена для анимации
         pauseButton.x = this.app.screen.width - 120;
         pauseButton.y = this.app.screen.height - 150;
         pauseButton.interactive = true;
         pauseButton.buttonMode = true;
         pauseButton.visible = false; // Initially hidden
+        pauseButton.alpha = 0; // Изначально прозрачна
 
         // Add hover effects
         pauseButton.on('pointerover', () => {
@@ -249,7 +253,16 @@ export class SceneManager {
         }
 
         this.pausePanel.visible = this.isPaused;
-        this.pauseButton.visible = !this.isPaused;
+
+        // Показываем/скрываем кнопку паузы
+        if (this.isPaused) {
+            this.pauseButton.visible = false;
+        } else {
+            // При возобновлении игры показываем кнопку паузы с анимацией
+            if (this.countersShown) { // Только если счетчики уже были показаны
+                this.showPauseButtonWithAnimation();
+            }
+        }
     }
 
     initializeLayers() {
@@ -292,8 +305,11 @@ export class SceneManager {
     updateWorldPosition() {
         // Show pause button when camera starts moving and game is not over
         if (this.camera.currentX > 0 && !this.pauseButton.visible && !this.rabbit.physics.gameOver) {
-            this.pauseButton.visible = true;
-            this.pauseButton.eventMode = 'static'; // Включаем взаимодействие с кнопкой
+            // Показываем кнопку паузы с анимацией
+            this.showPauseButtonWithAnimation();
+
+            // Показываем счетчики с анимацией одновременно с кнопкой паузы
+            this.showCountersWithAnimation();
         }
 
         // Обновляем позицию всех слоев относительно камеры
@@ -504,6 +520,11 @@ export class SceneManager {
     update(delta) {
         if (this.isPaused) return;
 
+        // Проверяем, не окончена ли игра
+        if (this.rabbit && this.rabbit.physics && this.rabbit.physics.gameOver) {
+            return; // Останавливаем обновление игры, если кролик умер
+        }
+
         // Обновляем камеру
         this.camera.update(delta);
 
@@ -576,6 +597,8 @@ export class SceneManager {
         this.virusCounterContainer = new PIXI.Container();
         this.virusCounterContainer.x = this.app.screen.width - 570; // Перемещаем весь счетчик еще правее
         this.virusCounterContainer.y = 70; // Та же высота, что и у шкалы
+        this.virusCounterContainer.alpha = 0; // Изначально скрыт
+        this.virusCounterContainer.scale.set(0.5); // Изначально уменьшен
         this.app.stage.addChild(this.virusCounterContainer);
 
         // Создаем спрайты для цифр
@@ -608,6 +631,8 @@ export class SceneManager {
         this.virulenceBarContainer = new PIXI.Container();
         this.virulenceBarContainer.x = this.app.screen.width - 172; // Располагаем справа в углу
         this.virulenceBarContainer.y = 70; // Та же высота, что и у счетчика
+        this.virulenceBarContainer.alpha = 0; // Изначально скрыт
+        this.virulenceBarContainer.scale.set(0.5); // Изначально уменьшен
         this.app.stage.addChild(this.virulenceBarContainer);
 
         // Background of the virulence bar (skale.png) - добавляем первым (будет на заднем плане)
@@ -635,13 +660,59 @@ export class SceneManager {
         this.virulenceSign.y = 0;
         this.virulenceBarContainer.addChild(this.virulenceSign);
 
+        // Добавляем элемент "Best" под табличкой вирулентности
+        this.createBestScore();
+
         this.updateVirulenceBar();
+    }
+
+    createBestScore() {
+        // Создаем контейнер для лучшего результата
+        this.bestScoreContainer = new PIXI.Container();
+        this.bestScoreContainer.x = this.app.screen.width - 172; // Та же позиция X что и у таблички вирулентности
+        this.bestScoreContainer.y = 145; // Под табличкой вирулентности
+        this.bestScoreContainer.alpha = 0; // Изначально скрыт
+        this.bestScoreContainer.scale.set(0.7); // Изначально уменьшен
+        this.app.stage.addChild(this.bestScoreContainer);
+
+        // Добавляем картинку "best" из текстур
+        this.bestSprite = new PIXI.Sprite(this.resources.textures['best.png']);
+        this.bestSprite.anchor.set(0.5);
+        this.bestSprite.scale.set(0.3); // Уменьшаем размер слова BEST еще
+        this.bestSprite.x = -50; // Смещаем левее
+        this.bestSprite.y = 5;
+        this.bestScoreContainer.addChild(this.bestSprite);
+
+        // Создаем спрайты для цифр лучшего результата
+        this.bestDigitSprites = [];
+        for (let i = 0; i < 4; i++) { // Поддерживаем до 9999 вирусов
+            const digitSprite = new PIXI.Sprite(this.resources.textures['0.png']);
+            digitSprite.anchor.set(0.5);
+            digitSprite.scale.set(0.13); // Уменьшаем размер цифр
+            digitSprite.x = 60 * i; // Промежуток между цифрами
+            digitSprite.visible = true;
+            this.bestScoreContainer.addChild(digitSprite);
+            this.bestDigitSprites.push(digitSprite);
+        }
+
+        // Добавляем запятую для лучшего результата (изначально скрыта)
+        this.bestCommaSprite = new PIXI.Sprite(this.resources.textures['comma.png']);
+        this.bestCommaSprite.anchor.set(0.5);
+        this.bestCommaSprite.scale.set(0.12); // Уменьшаем размер запятой
+        this.bestCommaSprite.x = -15;
+        this.bestCommaSprite.visible = false;
+        this.bestScoreContainer.addChild(this.bestCommaSprite);
+
+        // Загружаем лучший результат из sessionStorage
+        this.loadBestScore();
+        this.updateBestScore();
     }
 
     updateVirulenceBar() {
         if (this.virulenceBarFill) {
-            const maxWidth = this.virulenceBarBackground.width * 0.80; // Уменьшаем максимальную ширину, чтобы шкала не выходила за табличку
-            const fillWidth = (this.virusCount / 100) * maxWidth;
+            const maxWidth = this.virulenceBarBackground.width * 0.99; // Уменьшаем максимальную ширину, чтобы шкала не выходила за табличку
+            const clampedVirusCount = Math.min(this.virusCount, 1000); // Ограничиваем до 1000 вирусов
+            const fillWidth = (clampedVirusCount / 1000) * maxWidth;
             this.virulenceBarFill.clear();
             this.virulenceBarFill.beginFill(0x00FF00);
             this.virulenceBarFill.drawRect(0, 0, fillWidth, this.virulenceBarBackground.height * 0.9);
@@ -726,6 +797,10 @@ export class SceneManager {
             this.virulenceBarContainer.destroy({children: true});
             this.virulenceBarContainer = null;
         }
+        if (this.bestScoreContainer) {
+            this.bestScoreContainer.destroy({children: true});
+            this.bestScoreContainer = null;
+        }
         if (this.virulenceSign) {
             this.virulenceSign.destroy();
             this.virulenceSign = null;
@@ -737,6 +812,180 @@ export class SceneManager {
         if (this.virulenceBarFill) {
             this.virulenceBarFill.destroy();
             this.virulenceBarFill = null;
+        }
+    }
+
+    showCountersWithAnimation() {
+        if (this.countersShown) return; // Не показываем повторно
+        this.countersShown = true;
+
+        // Анимация появления счетчика вирусов
+        const virusCounterDuration = 800;
+        const virusCounterStartTime = Date.now();
+        const virusCounterStartScale = 0.5;
+        const virusCounterEndScale = 1.0;
+        const virusCounterStartAlpha = 0;
+        const virusCounterEndAlpha = 1;
+
+        const animateVirusCounter = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - virusCounterStartTime;
+            const progress = Math.min(elapsed / virusCounterDuration, 1);
+
+            const scale = virusCounterStartScale + (virusCounterEndScale - virusCounterStartScale) * this.easeOutBack(progress);
+            const alpha = virusCounterStartAlpha + (virusCounterEndAlpha - virusCounterStartAlpha) * this.easeOutQuad(progress);
+
+            this.virusCounterContainer.scale.set(scale);
+            this.virusCounterContainer.alpha = alpha;
+
+            if (progress < 1) {
+                requestAnimationFrame(animateVirusCounter);
+            }
+        };
+
+        // Анимация появления шкалы вирулентности (с задержкой)
+        setTimeout(() => {
+            const virulenceBarDuration = 800;
+            const virulenceBarStartTime = Date.now();
+            const virulenceBarStartScale = 0.5;
+            const virulenceBarEndScale = 1.0;
+            const virulenceBarStartAlpha = 0;
+            const virulenceBarEndAlpha = 1;
+
+            const animateVirulenceBar = () => {
+                const currentTime = Date.now();
+                const elapsed = currentTime - virulenceBarStartTime;
+                const progress = Math.min(elapsed / virulenceBarDuration, 1);
+
+                const scale = virulenceBarStartScale + (virulenceBarEndScale - virulenceBarStartScale) * this.easeOutBack(progress);
+                const alpha = virulenceBarStartAlpha + (virulenceBarEndAlpha - virulenceBarStartAlpha) * this.easeOutQuad(progress);
+
+                this.virulenceBarContainer.scale.set(scale);
+                this.virulenceBarContainer.alpha = alpha;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateVirulenceBar);
+                }
+            };
+
+            requestAnimationFrame(animateVirulenceBar);
+        }, 200); // Задержка 200мс для последовательного появления
+
+        // Анимация появления лучшего результата (с задержкой)
+        setTimeout(() => {
+            const bestScoreDuration = 800;
+            const bestScoreStartTime = Date.now();
+            const bestScoreStartScale = 0.5;
+            const bestScoreEndScale = 1.0;
+            const bestScoreStartAlpha = 0;
+            const bestScoreEndAlpha = 1;
+
+            const animateBestScore = () => {
+                const currentTime = Date.now();
+                const elapsed = currentTime - bestScoreStartTime;
+                const progress = Math.min(elapsed / bestScoreDuration, 1);
+
+                const scale = bestScoreStartScale + (bestScoreEndScale - bestScoreStartScale) * this.easeOutBack(progress);
+                const alpha = bestScoreStartAlpha + (bestScoreEndAlpha - bestScoreStartAlpha) * this.easeOutQuad(progress);
+
+                this.bestScoreContainer.scale.set(scale);
+                this.bestScoreContainer.alpha = alpha;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateBestScore);
+                }
+            };
+
+            requestAnimationFrame(animateBestScore);
+        }, 400); // Задержка 400мс для последовательного появления
+
+        requestAnimationFrame(animateVirusCounter);
+    }
+
+    easeOutBack(x) {
+        const c1 = 1.70158;
+        const c3 = c1 + 1;
+        return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    showPauseButtonWithAnimation() {
+        if (!this.pauseButton || this.pauseButton.alpha > 0) return; // Не показываем повторно
+
+        this.pauseButton.visible = true;
+        this.pauseButton.eventMode = 'static'; // Включаем взаимодействие с кнопкой
+
+        // Анимация появления кнопки паузы
+        const pauseButtonDuration = 800;
+        const pauseButtonStartTime = Date.now();
+        const pauseButtonStartScale = 0.5;
+        const pauseButtonEndScale = 0.3; // Финальный размер кнопки
+        const pauseButtonStartAlpha = 0;
+        const pauseButtonEndAlpha = 1;
+
+        const animatePauseButton = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - pauseButtonStartTime;
+            const progress = Math.min(elapsed / pauseButtonDuration, 1);
+
+            const scale = pauseButtonStartScale + (pauseButtonEndScale - pauseButtonStartScale) * this.easeOutBack(progress);
+            const alpha = pauseButtonStartAlpha + (pauseButtonEndAlpha - pauseButtonStartAlpha) * this.easeOutQuad(progress);
+
+            this.pauseButton.scale.set(scale);
+            this.pauseButton.alpha = alpha;
+
+            if (progress < 1) {
+                requestAnimationFrame(animatePauseButton);
+            }
+        };
+
+        requestAnimationFrame(animatePauseButton);
+    }
+
+    loadBestScore() {
+        // Загружаем лучший результат из sessionStorage
+        const savedBestScore = sessionStorage.getItem('fluffyBestScore');
+        this.bestScore = savedBestScore ? parseInt(savedBestScore) : 0;
+    }
+
+    saveBestScore() {
+        // Сохраняем лучший результат в sessionStorage
+        if (this.virusCount > this.bestScore) {
+            this.bestScore = this.virusCount;
+            sessionStorage.setItem('fluffyBestScore', this.bestScore.toString());
+            this.updateBestScore(); // Обновляем отображение
+        }
+    }
+
+    updateBestScore() {
+        if (!this.bestDigitSprites) return;
+
+        const count = this.bestScore.toString();
+        const numDigits = count.length;
+
+        // Считаем, сколько цифр будет отображаться
+        let visibleIndex = 0;
+        for (let i = 0; i < this.bestDigitSprites.length; i++) {
+            const digitSprite = this.bestDigitSprites[i];
+            const digitIndexInCount = i - (this.bestDigitSprites.length - numDigits);
+            if (digitIndexInCount >= 0 && digitIndexInCount < numDigits) {
+                const digitChar = count[digitIndexInCount];
+                digitSprite.texture = this.resources.textures[`${digitChar}.png`];
+                digitSprite.visible = true;
+                digitSprite.x = visibleIndex * 25; // Промежуток слева направо
+                visibleIndex++;
+            } else {
+                digitSprite.visible = false;
+            }
+        }
+
+        // Запятая после тысяч
+        if (this.bestScore > 999) {
+            this.bestCommaSprite.visible = true;
+            // Запятая после первой цифры (тысячи)
+            let commaPos = 25; // после первой цифры
+            this.bestCommaSprite.x = commaPos + 2; // чуть правее центра
+        } else {
+            this.bestCommaSprite.visible = false;
         }
     }
 }

@@ -24,6 +24,7 @@ export class RabbitAnimations {
         this.hitFrameDuration = 80;
         this.hitPauseFrame = 2;
         this.hitPauseDuration = 700;
+        this.gameOverShown = false;
     }
 
     setup() {
@@ -256,6 +257,17 @@ export class RabbitAnimations {
     }
 
     showGameOver() {
+        // Проверяем, не была ли уже показана табличка Game Over
+        if (this.gameOverShown) {
+            return;
+        }
+        this.gameOverShown = true;
+
+        // Сохраняем лучший результат при смерти кролика
+        if (this.sceneManager && this.sceneManager.saveBestScore) {
+            this.sceneManager.saveBestScore();
+        }
+
         const gameOverSprite = new PIXI.Sprite(this.resources.textures['game-over.png']);
         gameOverSprite.anchor.set(0.5);
         gameOverSprite.x = this.rabbit.app.screen.width / 2;
