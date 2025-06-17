@@ -241,7 +241,7 @@ export class SceneManager {
     togglePause() {
         // Не позволяем ставить на паузу, если игра окончена
         if (this.rabbit.physics.gameOver) return;
-        
+
         this.isPaused = !this.isPaused;
 
         if (!this.pausePanel) {
@@ -574,8 +574,8 @@ export class SceneManager {
     createVirusCounter() {
         // Создаем контейнер для счетчика
         this.virusCounterContainer = new PIXI.Container();
-        this.virusCounterContainer.x = this.app.screen.width - 200;
-        this.virusCounterContainer.y = 50;
+        this.virusCounterContainer.x = this.app.screen.width - 570; // Перемещаем весь счетчик еще правее
+        this.virusCounterContainer.y = 70; // Та же высота, что и у шкалы
         this.app.stage.addChild(this.virusCounterContainer);
 
         // Создаем спрайты для цифр
@@ -583,9 +583,9 @@ export class SceneManager {
         for (let i = 0; i < 4; i++) { // Поддерживаем до 9999 вирусов
             const digitSprite = new PIXI.Sprite(this.resources.textures['0.png']);
             digitSprite.anchor.set(0.5);
-            digitSprite.scale.set(0.15);
-            digitSprite.x = i * 35; // Увеличиваем расстояние между цифрами
-            digitSprite.visible = i === 0; // Показываем только первую цифру в начале
+            digitSprite.scale.set(0.3);
+            digitSprite.x = i * 65;
+            digitSprite.visible = true;
             this.virusCounterContainer.addChild(digitSprite);
             this.virusDigitSprites.push(digitSprite);
         }
@@ -594,31 +594,149 @@ export class SceneManager {
         this.commaSprite = new PIXI.Sprite(this.resources.textures['comma.png']);
         this.commaSprite.anchor.set(0.5);
         this.commaSprite.scale.set(0.15);
-        this.commaSprite.x = -10;
+        this.commaSprite.x = -10; // Изначальное положение запятой (будет переопределено)
         this.commaSprite.visible = false;
         this.virusCounterContainer.addChild(this.commaSprite);
+
+        this.createVirulenceBar();
 
         // Обновляем отображение счетчика
         this.updateVirusCounter();
     }
 
+    createVirulenceBar() {
+        this.virulenceBarContainer = new PIXI.Container();
+        this.virulenceBarContainer.x = this.app.screen.width - 172; // Располагаем справа в углу
+        this.virulenceBarContainer.y = 70; // Та же высота, что и у счетчика
+        this.app.stage.addChild(this.virulenceBarContainer);
+
+        // Background of the virulence bar (skale.png) - добавляем первым (будет на заднем плане)
+        this.virulenceBarBackground = new PIXI.Sprite(this.resources.textures['skale.png']);
+        this.virulenceBarBackground.scale.set(32 / 37); // Увеличиваем масштаб, чтобы высота стала примерно 30 пикселей
+        this.virulenceBarBackground.anchor.set(0.5);
+        this.virulenceBarBackground.x = 0;
+        this.virulenceBarBackground.y = 0;
+        this.virulenceBarContainer.addChild(this.virulenceBarBackground);
+
+        // Green filling for the virulence bar
+        this.virulenceBarFill = new PIXI.Graphics();
+        this.virulenceBarFill.beginFill(0x00FF00);
+        this.virulenceBarFill.drawRect(0, 0, 0, this.virulenceBarBackground.height * 0.9); // Slightly smaller than background
+        this.virulenceBarFill.endFill();
+        this.virulenceBarFill.x = -this.virulenceBarBackground.width * 0.5;
+        this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.45;
+        this.virulenceBarContainer.addChild(this.virulenceBarFill);
+
+        // Add the virulence sign (table.png) - добавляем последним (будет на переднем плане)
+        this.virulenceSign = new PIXI.Sprite(this.resources.textures['table.png']);
+        this.virulenceSign.anchor.set(0.5);
+        this.virulenceSign.scale.set(0.3);
+        this.virulenceSign.x = 0;
+        this.virulenceSign.y = 0;
+        this.virulenceBarContainer.addChild(this.virulenceSign);
+
+        this.updateVirulenceBar();
+    }
+
+    updateVirulenceBar() {
+        if (this.virulenceBarFill) {
+            const maxWidth = this.virulenceBarBackground.width * 0.95; // Slightly less than background width
+            const fillWidth = (this.virusCount / 100) * maxWidth;
+            this.virulenceBarFill.clear();
+            this.virulenceBarFill.beginFill(0x00FF00);
+            this.virulenceBarFill.drawRect(0, 0, fillWidth, this.virulenceBarBackground.height * 0.9);
+            this.virulenceBarFill.endFill();
+            this.virulenceBarFill.x = -this.virulenceBarBackground.width * 0.5;
+            this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.45;
+        }
+    }
+
     updateVirusCounter() {
         const count = this.virusCount.toString();
-        
-        // Показываем нужное количество цифр
+        const numDigits = count.length;
+
+        // The rightmost position for the last digit. We use the last sprite slot.
+        const rightmostDigitSlotX = (this.virusDigitSprites.length - 1) * 65;
+
         for (let i = 0; i < this.virusDigitSprites.length; i++) {
-            const digit = count[i] || '0';
-            this.virusDigitSprites[i].texture = this.resources.textures[`${digit}.png`];
-            // Показываем цифру, если она нужна для отображения текущего числа
-            this.virusDigitSprites[i].visible = i < count.length;
+            const digitSprite = this.virusDigitSprites[i];
+
+            // Determine the index of the digit in 'count' that corresponds to this sprite slot 'i'
+            const digitIndexInCount = i - (this.virusDigitSprites.length - numDigits);
+
+            if (digitIndexInCount >= 0 && digitIndexInCount < numDigits) {
+                const digitChar = count[digitIndexInCount];
+                digitSprite.texture = this.resources.textures[`${digitChar}.png`];
+                digitSprite.visible = true;
+                // Position for right alignment (relative to the container)
+                digitSprite.x = rightmostDigitSlotX - (this.virusDigitSprites.length - 1 - i) * 65;
+            } else {
+                digitSprite.visible = false; // Hide leading unused slots
+            }
         }
 
-        // Показываем запятую только если число больше 999
-        this.commaSprite.visible = this.virusCount > 999;
+        // Position comma for right alignment
+        if (this.virusCount > 999) {
+            this.commaSprite.visible = true;
+            // Comma should be after the thousands digit.
+            // The actual visible thousands digit sprite will be at index (this.virusDigitSprites.length - numDigits)
+            const thousandsDigitSpriteIndex = this.virusDigitSprites.length - numDigits;
+            this.commaSprite.x = this.virusDigitSprites[thousandsDigitSpriteIndex].x + 32.5; // 32.5 is half of 65
+        } else {
+            this.commaSprite.visible = false;
+        }
     }
 
     incrementVirusCount() {
-        this.virusCount++;
+        this.virusCount += 10; // Каждый вирус равен 10 очкам
         this.updateVirusCounter();
+        this.updateVirulenceBar();
+    }
+
+    reset() {
+        this.clearTimers();
+        this.isGameRunning = false;
+        this.rabbit = null;
+        this.score = 0;
+        this.virusCount = 0; // Reset virus count on game reset
+        this.currentWorldSpeed = this.initialWorldSpeed;
+        this.gameSpeedMultiplier = 1;
+
+        if (this.app.stage) {
+            this.app.stage.removeChildren();
+        }
+        if (this.worldContainer) {
+            this.worldContainer.removeChildren();
+        }
+        if (this.frontLayer) {
+            this.frontLayer.removeChildren();
+        }
+        if (this.backLayer) {
+            this.backLayer.removeChildren();
+        }
+        if (this.scoreText) {
+            this.scoreText.destroy();
+            this.scoreText = null;
+        }
+        if (this.virusCounterContainer) {
+            this.virusCounterContainer.destroy({children: true});
+            this.virusCounterContainer = null;
+        }
+        if (this.virulenceBarContainer) {
+            this.virulenceBarContainer.destroy({children: true});
+            this.virulenceBarContainer = null;
+        }
+        if (this.virulenceSign) {
+            this.virulenceSign.destroy();
+            this.virulenceSign = null;
+        }
+        if (this.virulenceBarBackground) {
+            this.virulenceBarBackground.destroy();
+            this.virulenceBarBackground = null;
+        }
+        if (this.virulenceBarFill) {
+            this.virulenceBarFill.destroy();
+            this.virulenceBarFill = null;
+        }
     }
 }
