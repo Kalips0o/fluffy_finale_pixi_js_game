@@ -624,7 +624,7 @@ export class SceneManager {
         this.virulenceBarFill.drawRect(0, 0, 0, this.virulenceBarBackground.height * 0.9); // Slightly smaller than background
         this.virulenceBarFill.endFill();
         this.virulenceBarFill.x = -this.virulenceBarBackground.width * 0.5;
-        this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.45;
+        this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.35;
         this.virulenceBarContainer.addChild(this.virulenceBarFill);
 
         // Add the virulence sign (table.png) - добавляем последним (будет на переднем плане)
@@ -640,14 +640,14 @@ export class SceneManager {
 
     updateVirulenceBar() {
         if (this.virulenceBarFill) {
-            const maxWidth = this.virulenceBarBackground.width * 0.95; // Slightly less than background width
+            const maxWidth = this.virulenceBarBackground.width * 0.80; // Уменьшаем максимальную ширину, чтобы шкала не выходила за табличку
             const fillWidth = (this.virusCount / 100) * maxWidth;
             this.virulenceBarFill.clear();
             this.virulenceBarFill.beginFill(0x00FF00);
             this.virulenceBarFill.drawRect(0, 0, fillWidth, this.virulenceBarBackground.height * 0.9);
             this.virulenceBarFill.endFill();
             this.virulenceBarFill.x = -this.virulenceBarBackground.width * 0.5;
-            this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.45;
+            this.virulenceBarFill.y = -this.virulenceBarBackground.height * 0.35;
         }
     }
 
