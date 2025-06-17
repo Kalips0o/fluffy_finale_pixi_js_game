@@ -154,6 +154,11 @@ export class UIManager {
         });
 
         restartButton.on('pointerdown', () => {
+            // Удаляем табличку START перед перезагрузкой
+            if (this.sceneManager) {
+                this.sceneManager.removeStartSign();
+            }
+            
             // Restart game logic
             location.reload();
         });

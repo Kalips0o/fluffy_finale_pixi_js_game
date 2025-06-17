@@ -142,6 +142,12 @@ export class RabbitAnimations {
         // Устанавливаем флаг game over в true
         this.rabbit.physics.gameOver = true;
         
+        // Сбрасываем флаг первого запуска игры
+        if (this.sceneManager) {
+            this.sceneManager.isFirstGame = false;
+            localStorage.setItem('isFirstGame', 'false');
+        }
+        
         // Отключаем управление
         if (this.rabbit.controls) {
             this.rabbit.controls.disable();
@@ -266,6 +272,10 @@ export class RabbitAnimations {
         // Сохраняем лучший результат при смерти кролика
         if (this.sceneManager && this.sceneManager.uiManager && this.sceneManager.uiManager.saveBestScore) {
             this.sceneManager.uiManager.saveBestScore();
+            // Принудительно обновляем отображение лучшего результата
+            if (this.sceneManager.uiManager.updateBestScore) {
+                this.sceneManager.uiManager.updateBestScore();
+            }
         }
 
         const gameOverSprite = new PIXI.Sprite(this.resources.textures['game-over.png']);
@@ -302,6 +312,11 @@ export class RabbitAnimations {
 
         requestAnimationFrame(animate);
         gameOverSprite.on('pointerdown', () => {
+            // Удаляем табличку START перед перезагрузкой
+            if (this.sceneManager) {
+                this.sceneManager.removeStartSign();
+            }
+            
             window.location.reload();
         });
     }

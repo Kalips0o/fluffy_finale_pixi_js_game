@@ -15,6 +15,12 @@ export class SceneManager {
         this.resources = resources;
         this.isPaused = false;
         this.isGameRunning = true;
+        this.isFirstGame = true; // Флаг для отслеживания первого запуска
+        this.startSign = null;
+
+        // Загружаем флаг первого запуска из localStorage
+        const savedFirstGame = localStorage.getItem('isFirstGame');
+        this.isFirstGame = savedFirstGame === null ? true : savedFirstGame === 'true';
 
         // Создаем контейнеры
         this.camera = new Camera(app);
@@ -80,7 +86,7 @@ export class SceneManager {
                     this.camera.update();
                     this.updateWorldPosition();
                 }
-                
+
                 // Менеджеры продолжают обновляться даже при gameOver
                 this.doctorManager.update(delta);
                 this.vaccineManager.update(delta);
@@ -116,6 +122,11 @@ export class SceneManager {
     drawScene() {
         // Отрисовываем сцену через LayerManager
         this.layerManager.drawScene();
+
+        // Создаем табличку START только при первом запуске игры
+        if (!this.startSign && this.isFirstGame) {
+            this.createStartSign();
+        }
     }
 
     // Добавляем метод для принудительной перерисовки сцены
@@ -178,32 +189,24 @@ export class SceneManager {
     }
 
     cleanup() {
-        // Очищаем все слои через LayerManager
-        this.layerManager.cleanup();
-
-        // Очищаем докторов
-        if (this.doctorManager) {
-            this.doctorManager.cleanup();
+        // Очищаем все менеджеры
+        if (this.entityManager) {
+            this.entityManager.cleanup();
         }
-
-        // Очищаем вакцины
-        if (this.vaccineManager) {
-            this.vaccineManager.cleanup();
-        }
-
-        // Очищаем вирусы
-        if (this.virusManager) {
-            this.virusManager.cleanup();
-        }
-
-        // Очищаем эффекты через EffectManager
         if (this.effectManager) {
             this.effectManager.cleanup();
         }
-
-        // Очищаем кролика
-        if (this.rabbit) {
-            this.rabbit.cleanup();
+        if (this.layerManager) {
+            this.layerManager.cleanup();
+        }
+        if (this.uiManager) {
+            this.uiManager.cleanup();
+        }
+        
+        // Очищаем табличку START
+        if (this.startSign && this.startSign.parent) {
+            this.startSign.parent.removeChild(this.startSign);
+            this.startSign = null;
         }
     }
 
@@ -246,5 +249,54 @@ export class SceneManager {
         if (this.layerManager) {
             this.layerManager.reset();
         }
+    }
+
+    createStartSign() {
+        // Создаем табличку START с текстурой
+        this.startSign = new PIXI.Sprite(this.resources.textures['start.png']);
+        this.startSign.anchor.set(0.5);
+
+        // Позиционируем табличку
+        this.startSign.x = this.rabbitStartX - 120; // Немного левее кролика
+        const groundY = this.rabbit.physics.getGrassY();
+        this.startSign.y = groundY + 10; // Ближе к земле
+
+        // Устанавливаем размер таблички
+        this.startSign.scale.set(0.5, 0.5);
+
+        console.log('Позиция таблички START:', this.startSign.x, this.startSign.y);
+        console.log('Размер таблички START:', this.startSign.width, this.startSign.height);
+        console.log('Позиция земли:', groundY);
+
+        // Добавляем табличку в worldContainer
+        if (this.worldContainer) {
+            this.worldContainer.addChild(this.startSign);
+
+            // Устанавливаем z-индекс, чтобы табличка была видна
+            this.worldContainer.setChildIndex(this.startSign, this.worldContainer.children.length - 1);
+
+            console.log('Табличка START добавлена в worldContainer');
+            console.log('Количество детей в worldContainer:', this.worldContainer.children.length);
+        } else {
+            console.error('worldContainer не найден!');
+        }
+
+        // Сохраняем флаг в localStorage, что это уже не первый запуск
+        this.isFirstGame = false;
+        localStorage.setItem('isFirstGame', 'false');
+    }
+
+    removeStartSign() {
+        if (this.startSign && this.startSign.parent) {
+            this.startSign.parent.removeChild(this.startSign);
+            this.startSign = null;
+        }
+    }
+
+    // Метод для сброса флага первого запуска (для тестирования)
+    resetFirstGameFlag() {
+        this.isFirstGame = true;
+        localStorage.removeItem('isFirstGame');
+        console.log('Флаг первого запуска сброшен');
     }
 }

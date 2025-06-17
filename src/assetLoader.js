@@ -39,7 +39,8 @@ export async function loadAssets() {
             'vaccine-top-part.png',
             'vaccine-lower-part.png',
             'fragment__vaccine_1.png',
-            'fragment__vaccine_2.png'
+            'fragment__vaccine_2.png',
+            'start.png'
         ];
 
         // Создаем текстуры из спрайт-листов
