@@ -8,7 +8,15 @@ export function setupApp() {
 
     document.body.style.margin = '0';
     document.body.style.overflow = 'hidden';
-    document.body.appendChild(app.view);
+    
+    // Добавляем PIXI приложение в game-container
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+        gameContainer.appendChild(app.view);
+    } else {
+        // Fallback если game-container не найден
+        document.body.appendChild(app.view);
+    }
 
     return app;
 }

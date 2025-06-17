@@ -3,8 +3,70 @@
 <head>
     <meta charset="UTF-8" />
     <title>Fluffy Finale</title>
+    <link rel="icon" type="image/png" href="/assets/logo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #screen-too-small {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #screen-too-small img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        
+        /* Показываем изображение на мобильных устройствах */
+        @media (max-width: 768px), (max-height: 600px) {
+            #screen-too-small {
+                display: flex !important;
+            }
+            
+            /* Скрываем игру на мобильных */
+            #game-container canvas {
+                display: none !important;
+            }
+        }
+        
+        /* Дополнительная проверка для очень маленьких экранов */
+        @media (max-width: 480px) {
+            #screen-too-small {
+                display: flex !important;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div id="game-container">
+        <div id="screen-too-small">
+            <img src="/assets/Screen_is_too_small.png" alt="Screen is too small" />
+        </div>
+    </div>
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>
