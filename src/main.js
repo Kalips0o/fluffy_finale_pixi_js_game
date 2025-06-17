@@ -3,6 +3,7 @@ import { setupApp } from './appSetup';
 import { SceneManager } from './sceneManager';
 import { loadAssets } from './assetLoader';
 import { ScreenSizeManager } from './screenSizeManager';
+import { LoadingScreen } from './loadingScreen';
 
 // Инициализация приложения
 const app = setupApp();
@@ -10,12 +11,43 @@ const app = setupApp();
 // Глобальная переменная для доступа к sceneManager из консоли
 let sceneManager;
 let screenSizeManager;
+let loadingScreen;
 
 // Инициализируем менеджер размера экрана
 screenSizeManager = new ScreenSizeManager();
 
-// Загрузка ассетов и создание сцены
-loadAssets().then((resources) => {
+// Обработчик изменения размера окна для загрузочного экрана
+window.addEventListener('resize', () => {
+    if (loadingScreen && loadingScreen.isVisible) {
+        loadingScreen.resize();
+    }
+});
+
+// Показываем загрузочный экран
+loadingScreen = new LoadingScreen(app);
+loadingScreen.show().then(() => {
+    // После показа загрузочного экрана начинаем загрузку ресурсов
+    return loadAssets();
+}).then((resources) => {
+    // Минимальное время показа загрузочного экрана (2 секунды для прохождения всех 4 стадий)
+    const minLoadingTime = 2000;
+    const loadingStartTime = Date.now();
+    
+    return new Promise((resolve) => {
+        const checkTime = () => {
+            const elapsedTime = Date.now() - loadingStartTime;
+            if (elapsedTime >= minLoadingTime) {
+                resolve(resources);
+            } else {
+                setTimeout(checkTime, 100);
+            }
+        };
+        checkTime();
+    });
+}).then((resources) => {
+    // Скрываем загрузочный экран
+    loadingScreen.hide();
+    
     // Создаем менеджер сцены
     sceneManager = new SceneManager(app, resources);
     
@@ -53,4 +85,10 @@ loadAssets().then((resources) => {
     // window.addEventListener('resize', () => {
     //     sceneManager.drawScene();
     // });
+}).catch((error) => {
+    console.error('Error during loading:', error);
+    // Скрываем загрузочный экран в случае ошибки
+    if (loadingScreen) {
+        loadingScreen.hide();
+    }
 });

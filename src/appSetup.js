@@ -3,7 +3,7 @@ import * as PIXI from 'pixi.js';
 export function setupApp() {
     const app = new PIXI.Application({
         resizeTo: window,
-        backgroundColor: 0x222233,
+        backgroundColor: 0x333333,
     });
 
     document.body.style.margin = '0';

@@ -2,6 +2,9 @@ import * as PIXI from 'pixi.js';
 
 export async function loadAssets() {
     try {
+        // Загружаем загрузочный экран отдельно
+        const bootSplashTexture = await PIXI.Assets.load('/img/boot_splash.png');
+        
         // Загружаем все необходимые ресурсы
         const worldAssets = await PIXI.Assets.load('/img/WorldAssets-hd.json');
         const rabbitAssets = await PIXI.Assets.load('/img/rabbit.json');
@@ -45,6 +48,9 @@ export async function loadAssets() {
 
         // Создаем текстуры из спрайт-листов
         const textures = {};
+        
+        // Добавляем загрузочный экран
+        textures['boot_splash.png'] = bootSplashTexture;
         
         // Добавляем текстуры из WorldAssets
         if (worldAssets.textures) {
