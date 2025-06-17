@@ -18,6 +18,11 @@ export class Camera {
     update() {
         if (!this.target) return;
 
+        // Проверяем, не окончена ли игра
+        if (this.target.physics && this.target.physics.gameOver) {
+            return; // Останавливаем движение камеры, если игра окончена
+        }
+
         // Получаем размеры экрана
         const screenWidth = this.app.screen.width;
         

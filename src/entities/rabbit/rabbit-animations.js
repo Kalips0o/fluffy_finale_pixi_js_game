@@ -130,12 +130,12 @@ export class RabbitAnimations {
 
     playFallingAnimation(isVaccineExplosion = false) {
         // Скрываем кнопку паузы в начале падения и блокируем её
-        if (this.sceneManager && this.sceneManager.pauseButton) {
+        if (this.sceneManager && this.sceneManager.uiManager && this.sceneManager.uiManager.pauseButton) {
             console.log('Hiding pause button at start of falling');
-            this.sceneManager.pauseButton.visible = false;
-            this.sceneManager.pauseButton.eventMode = 'none'; // Отключаем взаимодействие с кнопкой
-            if (this.sceneManager.pausePanel) {
-                this.sceneManager.pausePanel.visible = false;
+            this.sceneManager.uiManager.pauseButton.visible = false;
+            this.sceneManager.uiManager.pauseButton.eventMode = 'none'; // Отключаем взаимодействие с кнопкой
+            if (this.sceneManager.uiManager.pausePanel) {
+                this.sceneManager.uiManager.pausePanel.visible = false;
             }
         }
 
@@ -209,15 +209,15 @@ export class RabbitAnimations {
                 this.rabbit.sprite.y = newY;
                 this.rabbit.sprite.rotation = current.rotation + (next.rotation - current.rotation) * bounceFraction;
                 
-                // Создаем эффект пыли при отскоке
-                if (lastBounceY !== null && newY > lastBounceY && currentTime - lastBounceTime > 150) {
-                    this.dustAnimation.createDustEffect(
-                        this.rabbit.sprite.x,
-                        this.rabbit.sprite.y + 20,
-                        Math.PI * 0.5
-                    );
-                    lastBounceTime = currentTime;
-                }
+                // Убираем создание эффекта пыли при отскоке
+                // if (lastBounceY !== null && newY > lastBounceY && currentTime - lastBounceTime > 150) {
+                //     this.dustAnimation.createDustEffect(
+                //         this.rabbit.sprite.x,
+                //         this.rabbit.sprite.y + 20,
+                //         Math.PI * 0.5
+                //     );
+                //     lastBounceTime = currentTime;
+                // }
                 lastBounceY = newY;
             } else {
                 const finalProgress = (progress - (bounces.length - 1) / bounces.length) * bounces.length;
@@ -242,7 +242,7 @@ export class RabbitAnimations {
             }
 
             this.rabbit.sprite.texture = this.resources.textures['rabbit_fell_2.png'];
-            this.dustAnimation.update();
+            // this.dustAnimation.update(); // Убираем обновление пыли
 
             if (progress < 1) {
                 requestAnimationFrame(animate);
@@ -264,8 +264,8 @@ export class RabbitAnimations {
         this.gameOverShown = true;
 
         // Сохраняем лучший результат при смерти кролика
-        if (this.sceneManager && this.sceneManager.saveBestScore) {
-            this.sceneManager.saveBestScore();
+        if (this.sceneManager && this.sceneManager.uiManager && this.sceneManager.uiManager.saveBestScore) {
+            this.sceneManager.uiManager.saveBestScore();
         }
 
         const gameOverSprite = new PIXI.Sprite(this.resources.textures['game-over.png']);

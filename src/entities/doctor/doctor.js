@@ -33,7 +33,7 @@ export class Doctor {
         // Устанавливаем начальное отражение в зависимости от направления
         this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
         this.sprite.x = this.x;
-        this.sprite.y = this.y + 5; // Опускаем доктора на 20 пикселей ниже
+        this.sprite.y = this.y - 10;
 
         // Создаем хитбокс
         this.hitbox = new PIXI.Rectangle(

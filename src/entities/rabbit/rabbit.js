@@ -39,6 +39,8 @@ export class Rabbit {
     }
 
     update(delta) {
+        if (this.physics.gameOver) return; // Останавливаем обновление при окончании игры
+        
         this.physics.updateMovement(delta);
         this.physics.handleJump(delta);
         this.physics.handleBounds();

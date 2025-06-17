@@ -18,7 +18,7 @@ export class HammerAnimation {
         this.hammer.rotation = 0;
         this.worldContainer.addChild(this.hammer);
 
-        const duration = 2500;
+        const duration = 2000; // Увеличиваем длительность для более плавной дуги
         const startTime = Date.now();
 
         const animate = () => {
@@ -26,28 +26,22 @@ export class HammerAnimation {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Animate hammer
-            const hammerProgress = Math.min(progress * 1.5, 1); // Hammer animation is faster
-            if (hammerProgress < 0.7) {
-                // Hammer flies to the left
-                const hammerX = startX - (hammerProgress * 300); // Move left
-                const hammerY = startY - (Math.sin(hammerProgress * Math.PI * 2) * 100); // Up and down motion
-                const hammerRotation = hammerProgress * Math.PI * 4; // Spinning rotation
-                
-                this.hammer.x = hammerX;
-                this.hammer.y = hammerY;
-                this.hammer.rotation = hammerRotation;
-            } else {
-                // Hammer falls to the ground
-                const fallProgress = (hammerProgress - 0.7) / 0.3; // Scale to 0-1
-                const fallX = startX - 300 + (fallProgress * 50); // Slight forward movement
-                const fallY = startY + (fallProgress * (groundY - startY + 50)); // Fall to ground
-                const fallRotation = Math.PI * 4 + (fallProgress * Math.PI * 0.5); // Final rotation
-                
-                this.hammer.x = fallX;
-                this.hammer.y = fallY;
-                this.hammer.rotation = fallRotation;
-            }
+            // Красивая анимация: молоток отлетает влево и падает вниз по дуге
+            const horizontalDistance = 350; // Расстояние влево
+            const verticalDistance = groundY - startY + 100; // Расстояние вниз + немного ниже земли
+            
+            // Горизонтальное движение (равномерное)
+            const hammerX = startX - (progress * horizontalDistance);
+            
+            // Вертикальное движение (параболическая дуга)
+            const hammerY = startY + (progress * progress * verticalDistance); // Квадратичная функция для дуги
+            
+            // Легкое вращение для реалистичности
+            const hammerRotation = progress * Math.PI * 2.5; // Увеличиваем поворот до 2.5 оборотов
+            
+            this.hammer.x = hammerX;
+            this.hammer.y = hammerY;
+            this.hammer.rotation = hammerRotation;
             
             // Continue animation if not finished
             if (progress < 1) {

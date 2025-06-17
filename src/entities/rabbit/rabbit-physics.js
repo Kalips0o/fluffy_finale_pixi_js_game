@@ -78,6 +78,8 @@ export class RabbitPhysics {
     }
 
     updateMovement(delta) {
+        if (this.gameOver) return; // Останавливаем движение при окончании игры
+        
         if (this.rabbit.isMoving && !this.isHitting) {
             const newX = this.rabbit.sprite.x + this.speed * this.rabbit.direction * delta;
 

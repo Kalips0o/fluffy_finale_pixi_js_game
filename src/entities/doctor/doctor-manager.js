@@ -14,8 +14,8 @@ export class DoctorManager {
         this.verticalVariation = 30; // Добавляем вариацию по вертикали
 
         // Создаем контейнер для отладочной графики
-        this.debugContainer = new PIXI.Container();
-        this.sceneManager.worldContainer.addChild(this.debugContainer);
+        // this.debugContainer = new PIXI.Container();
+        // this.sceneManager.worldContainer.addChild(this.debugContainer);
     }
 
     init() {
@@ -41,14 +41,10 @@ export class DoctorManager {
         const worldX = baseWorldX + randomDistance;
         const grassY = this.getGrassY();
         const verticalOffset = (Math.random() - 0.5) * this.verticalVariation;
-        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 50 + verticalOffset, this.sceneManager);
+        const doctor = new Doctor(this.app, this.resources, worldX, grassY - 30 + verticalOffset, this.sceneManager);
         
         // Добавляем доктора в контейнер мира
         this.sceneManager.worldContainer.addChild(doctor.sprite);
-        
-        // Создаем и добавляем графику для отладки
-        doctor.debugGraphics = new PIXI.Graphics();
-        this.debugContainer.addChild(doctor.debugGraphics);
         
         this.doctors.push(doctor);
         
@@ -62,16 +58,14 @@ export class DoctorManager {
     }
 
     update(delta) {
-        // Спавним новых докторов
-        this.spawnDoctor();
-
-        // Обновляем существующих докторов
+        // Спавним новых докторов только если игра не окончена
+        if (!this.sceneManager.rabbit.physics.gameOver) {
+            this.spawnDoctor();
+        }
+        
+        // Обновляем существующих докторов (они продолжают двигаться даже при gameOver)
         this.doctors = this.doctors.filter(doctor => {
             if (!doctor.isActive) {
-                // Удаляем графику отладки
-                if (doctor.debugGraphics && doctor.debugGraphics.parent) {
-                    doctor.debugGraphics.parent.removeChild(doctor.debugGraphics);
-                }
                 doctor.deactivate();
                 return false;
             }
@@ -79,9 +73,9 @@ export class DoctorManager {
             doctor.update(delta);
             
             // Обновляем графику отладки
-            if (doctor.debugGraphics) {
-                doctor.debugGraphics.clear();
-            }
+            // if (doctor.debugGraphics) {
+            //     doctor.debugGraphics.clear();
+            // }
             
             // Проверяем столкновение с кроликом только если доктор активен
             if (doctor.isActive) {
@@ -171,11 +165,11 @@ export class DoctorManager {
         }
 
         // Скрываем кнопку паузы и панель паузы
-        if (this.sceneManager.pauseButton) {
-            this.sceneManager.pauseButton.visible = false;
+        if (this.sceneManager.uiManager && this.sceneManager.uiManager.pauseButton) {
+            this.sceneManager.uiManager.pauseButton.visible = false;
         }
-        if (this.sceneManager.pausePanel) {
-            this.sceneManager.pausePanel.visible = false;
+        if (this.sceneManager.uiManager && this.sceneManager.uiManager.pausePanel) {
+            this.sceneManager.uiManager.pausePanel.visible = false;
         }
         
         // Start falling animation

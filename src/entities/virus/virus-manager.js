@@ -27,10 +27,6 @@ export class VirusManager {
         this.virusesInCurrentPattern = 0;
         this._currentPatternStartX = 0;
         this._horizontalGapBetweenPatterns = 3000; // Увеличиваем отступ между группами для лучшей читаемости
-
-        // Создаем контейнер для отладочной графики
-        this.debugContainer = new PIXI.Container();
-        this.worldContainer.addChild(this.debugContainer);
     }
 
     init() {
@@ -83,10 +79,6 @@ export class VirusManager {
             // Добавляем вирус в контейнер мира
             this.sceneManager.worldContainer.addChild(virus.container);
             
-            // Создаем и добавляем графику для отладки
-            virus.debugGraphics = new PIXI.Graphics();
-            this.debugContainer.addChild(virus.debugGraphics);
-            
             this.viruses.push(virus);
         }
 
@@ -105,28 +97,19 @@ export class VirusManager {
     }
 
     update(delta) {
-        // Спавним новые вирусы
-        this.spawnVirus();
-
-        // Обновляем существующие вирусы
+        // Спавним новые вирусы только если игра не окончена
+        if (!this.sceneManager.rabbit.physics.gameOver) {
+            this.spawnVirus();
+        }
+        
+        // Обновляем существующие вирусы (они продолжают двигаться даже при gameOver)
         this.viruses = this.viruses.filter(virus => {
             if (!virus.isActive) {
-                // Удаляем графику отладки
-                if (virus.debugGraphics && virus.debugGraphics.parent) {
-                    virus.debugGraphics.parent.removeChild(virus.debugGraphics);
-                }
                 virus.deactivate();
                 return false;
             }
 
             virus.update(delta);
-            
-            // Обновляем графику отладки
-            if (virus.debugGraphics) {
-                virus.debugGraphics.clear();
-                virus.debugGraphics.lineStyle(2, 0x00FF00);
-                virus.debugGraphics.drawRect(virus.hitbox.x, virus.hitbox.y, virus.hitbox.width, virus.hitbox.height);
-            }
             
             // Проверяем столкновение с кроликом
             if (virus.isActive) {
@@ -148,7 +131,7 @@ export class VirusManager {
                 if (collision) {
                     console.log('Virus collected!');
                     this.handleCollection(virus, rabbit); // Восстанавливаем обработку сбора
-                    this.sceneManager.incrementVirusCount(); // Увеличиваем счетчик вирусов
+                    this.sceneManager.uiManager.incrementVirusCount(); // Увеличиваем счетчик вирусов
                     return false;
                 }
             }

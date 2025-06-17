@@ -19,8 +19,8 @@ export class VaccineManager {
         console.log('VaccineExplosion initialized:', this.vaccineExplosion);
 
         // Создаем контейнер для отладочной графики
-        this.debugContainer = new PIXI.Container();
-        this.worldContainer.addChild(this.debugContainer);
+        // this.debugContainer = new PIXI.Container();
+        // this.worldContainer.addChild(this.debugContainer);
     }
 
     init() {
@@ -64,8 +64,8 @@ export class VaccineManager {
         this.sceneManager.worldContainer.addChild(vaccine.sprite);
         
         // Создаем и добавляем графику для отладки
-        vaccine.debugGraphics = new PIXI.Graphics();
-        this.debugContainer.addChild(vaccine.debugGraphics);
+        // vaccine.debugGraphics = new PIXI.Graphics();
+        // this.debugContainer.addChild(vaccine.debugGraphics);
         
         this.vaccines.push(vaccine);
         this.lastSpawnTime = currentTime;
@@ -78,16 +78,18 @@ export class VaccineManager {
     }
 
     update(delta) {
-        // Спавним новые вакцины
-        this.spawnVaccine();
-
-        // Обновляем существующие вакцины
+        // Спавним новые вакцины только если игра не окончена
+        if (!this.sceneManager.rabbit.physics.gameOver) {
+            this.spawnVaccine();
+        }
+        
+        // Обновляем существующие вакцины (они продолжают двигаться даже при gameOver)
         this.vaccines = this.vaccines.filter(vaccine => {
             if (!vaccine.isActive) {
                 // Удаляем графику отладки
-                if (vaccine.debugGraphics && vaccine.debugGraphics.parent) {
-                    vaccine.debugGraphics.parent.removeChild(vaccine.debugGraphics);
-                }
+                // if (vaccine.debugGraphics && vaccine.debugGraphics.parent) {
+                //     vaccine.debugGraphics.parent.removeChild(vaccine.debugGraphics);
+                // }
                 vaccine.deactivate();
                 return false;
             }
@@ -95,11 +97,11 @@ export class VaccineManager {
             vaccine.update(delta);
             
             // Обновляем графику отладки
-            if (vaccine.debugGraphics) {
-                vaccine.debugGraphics.clear();
-                vaccine.debugGraphics.lineStyle(2, 0x00FF00);
-                vaccine.debugGraphics.drawRect(vaccine.hitbox.x, vaccine.hitbox.y, vaccine.hitbox.width, vaccine.hitbox.height);
-            }
+            // if (vaccine.debugGraphics) {
+            //     vaccine.debugGraphics.clear();
+            //     vaccine.debugGraphics.lineStyle(2, 0x00FF00);
+            //     vaccine.debugGraphics.drawRect(vaccine.hitbox.x, vaccine.hitbox.y, vaccine.hitbox.width, vaccine.hitbox.height);
+            // }
             
             // Проверяем столкновение с кроликом
             if (vaccine.isActive) {
