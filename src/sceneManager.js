@@ -8,6 +8,7 @@ import { VirusManager } from './entities/virus/virus-manager';
 import { UIManager } from './managers/uiManager';
 import { LayerManager } from './managers/layerManager';
 import { EffectManager } from './managers/effectManager .js';
+import { AudioManager } from './managers/audioManager';
 
 export class SceneManager {
     constructor(app, resources) {
@@ -27,6 +28,9 @@ export class SceneManager {
         this.worldContainer = new PIXI.Container();
         this.app.stage.addChild(this.camera.container);
         this.camera.container.addChild(this.worldContainer);
+
+        // Инициализируем Audio Manager
+        this.audioManager = new AudioManager();
 
         // Инициализируем UI Manager
         this.uiManager = new UIManager(app, resources, this);
@@ -73,6 +77,9 @@ export class SceneManager {
         // Устанавливаем границы для камеры
         this.camera.minX = 0;
         this.camera.maxX = 10000; // Достаточно большое значение для бесконечной прокрутки
+
+        // Запускаем фоновую музыку
+        this.startBackgroundMusic();
 
         // Сначала отрисовываем сцену
         this.drawScene();
@@ -147,6 +154,35 @@ export class SceneManager {
     // Метод для добавления эффектов крови на камеру
     addCameraBloodSplatter() {
         this.effectManager.addCameraBloodSplatter();
+    }
+
+    // Метод для воспроизведения звука
+    playSound(soundName) {
+        if (this.audioManager) {
+            return this.audioManager.playSound(soundName);
+        }
+        return null;
+    }
+
+    // Метод для остановки звука
+    stopSound(audioElement) {
+        if (this.audioManager) {
+            this.audioManager.stopSound(audioElement);
+        }
+    }
+
+    // Метод для запуска фоновой музыки
+    startBackgroundMusic() {
+        if (this.audioManager) {
+            this.audioManager.startBackgroundMusic();
+        }
+    }
+
+    // Метод для остановки фоновой музыки
+    stopBackgroundMusic() {
+        if (this.audioManager) {
+            this.audioManager.stopBackgroundMusic();
+        }
     }
 
     update(delta) {

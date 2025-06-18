@@ -151,6 +151,12 @@ export class VaccineManager {
         if (vaccine.isHit) return;
         vaccine.isHit = true;
         vaccine.sprite.visible = false;
+        
+        // Воспроизводим звук взрыва вакцины
+        if (this.sceneManager && this.sceneManager.playSound) {
+            this.sceneManager.playSound('vaccine_explosion');
+        }
+        
         this.vaccineExplosion.createExplosion(vaccine.sprite.x, vaccine.sprite.y, vaccine.sprite);
         this.sceneManager.addCameraBloodSplatter();
         this.sceneManager.rabbit.animations.playFallingAnimation(true); // Добавляем параметр true для взрыва
@@ -160,6 +166,12 @@ export class VaccineManager {
         if (vaccine.isHit) return;
         vaccine.isHit = true;
         vaccine.sprite.visible = false;
+        
+        // Воспроизводим звук взрыва вакцины
+        if (this.sceneManager && this.sceneManager.playSound) {
+            this.sceneManager.playSound('vaccine_explosion');
+        }
+        
         this.vaccineExplosion.createExplosion(vaccine.sprite.x, vaccine.sprite.y, vaccine.sprite);
         this.sceneManager.rabbit.animations.playFallingAnimation(true); // Добавляем параметр true для взрыва
     }

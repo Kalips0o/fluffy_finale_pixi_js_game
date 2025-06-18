@@ -87,6 +87,14 @@ export class UIManager {
         soundButton.interactive = true;
         soundButton.buttonMode = true;
 
+        // Устанавливаем правильную текстуру в зависимости от сохраненного состояния звука
+        if (this.sceneManager && this.sceneManager.audioManager) {
+            const isSoundOn = this.sceneManager.audioManager.isSoundOn();
+            if (!isSoundOn) {
+                soundButton.texture = PIXI.Texture.from('/assets/hud/soundOff.png');
+            }
+        }
+
         // Add hover effects
         soundButton.on('pointerover', () => {
             soundButton.scale.set(0.35);
@@ -99,11 +107,16 @@ export class UIManager {
 
         // Add click handler to toggle sound button texture
         soundButton.on('pointerdown', () => {
-            const currentTexture = soundButton.texture;
-            if (currentTexture === PIXI.Texture.from('/assets/hud/soundOn.png')) {
-                soundButton.texture = PIXI.Texture.from('/assets/hud/soundOff.png');
-            } else {
-                soundButton.texture = PIXI.Texture.from('/assets/hud/soundOn.png');
+            // Переключаем звук через AudioManager
+            if (this.sceneManager && this.sceneManager.audioManager) {
+                const isSoundOn = this.sceneManager.audioManager.toggleSound();
+                
+                // Обновляем текстуру кнопки в зависимости от состояния звука
+                if (isSoundOn) {
+                    soundButton.texture = PIXI.Texture.from('/assets/hud/soundOn.png');
+                } else {
+                    soundButton.texture = PIXI.Texture.from('/assets/hud/soundOff.png');
+                }
             }
         });
 
@@ -178,8 +191,16 @@ export class UIManager {
         
         if (this.isPaused) {
             this.showPausePanel();
+            // Останавливаем фоновую музыку при паузе
+            if (this.sceneManager && this.sceneManager.stopBackgroundMusic) {
+                this.sceneManager.stopBackgroundMusic();
+            }
         } else {
             this.hidePausePanel();
+            // Возобновляем фоновую музыку при возобновлении игры
+            if (this.sceneManager && this.sceneManager.startBackgroundMusic) {
+                this.sceneManager.startBackgroundMusic();
+            }
         }
         
         // Notify scene manager about pause state change

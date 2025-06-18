@@ -139,12 +139,26 @@ export class DoctorManager {
         
         // If rabbit is hitting, deactivate the doctor and show blood splatter
         if (rabbit.physics.hitActive) {
+            // Устанавливаем флаг, что кролик ударил доктора
+            rabbit.physics.hitDoctor = true;
+            
+            // Воспроизводим звук удара по доктору
+            if (this.sceneManager && this.sceneManager.playSound) {
+                this.sceneManager.playSound('blow_to_doctor');
+            }
+            
             this.sceneManager.addCameraBloodSplatter(); // Add blood splatter to camera when hitting
             doctor.deactivate();
             return;
         }
         
         console.log('Regular collision detected, triggering game over');
+        
+        // Воспроизводим звук столкновения с доктором
+        if (this.sceneManager && this.sceneManager.playSound) {
+            this.sceneManager.playSound('the_rabbit_collided_with_the_doctor');
+        }
+        
         // Make the doctor smile and face right
         doctor.startSmiling();
         

@@ -61,6 +61,11 @@ export class RabbitPhysics {
         this.isJumping = true;
         this.jumpVelocity = this.jumpPower;
         this.rabbit.animations.play('jump');
+        
+        // Воспроизводим звук прыжка
+        if (this.rabbit.sceneManager && this.rabbit.sceneManager.playSound) {
+            this.rabbit.sceneManager.playSound('bunny_jumping');
+        }
     }
 
     startHit() {
@@ -167,8 +172,13 @@ export class RabbitPhysics {
         // Устанавливаем правильную текстуру для последнего кадра удара сразу при приземлении
         if (this.hitDoctor) {
             this.rabbit.sprite.texture = this.rabbit.resources.textures['bunny_hits_4.png'];
+            // Звук удара по доктору уже воспроизводится в doctor-manager.js при столкновении
         } else {
             this.rabbit.sprite.texture = this.rabbit.resources.textures['bunny_hits_the_ground.png'];
+            // Воспроизводим звук удара по земле
+            if (this.rabbit.sceneManager && this.rabbit.sceneManager.playSound) {
+                this.rabbit.sceneManager.playSound('hits_the_ground');
+            }
         }
         const scale = 0.15;
         this.rabbit.sprite.scale.set(scale);

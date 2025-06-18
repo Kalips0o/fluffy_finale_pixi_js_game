@@ -144,6 +144,12 @@ export class VirusManager {
         if (virus.isCollected) return;
         virus.isCollected = true;
         virus.container.visible = false; // Скрываем весь контейнер (и вирус, и свечение)
+        
+        // Воспроизводим звук сбора вируса
+        if (this.sceneManager && this.sceneManager.playSound) {
+            this.sceneManager.playSound('collected_the_virus');
+        }
+        
         // Здесь можно добавить эффект сбора вируса
         // Например, анимацию исчезновения или эффект частиц
     }

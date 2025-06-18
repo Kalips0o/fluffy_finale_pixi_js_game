@@ -129,6 +129,20 @@ export class RabbitAnimations {
     }
 
     playFallingAnimation(isVaccineExplosion = false) {
+        // Воспроизводим звук падения с задержкой для создания драматического эффекта
+        if (!isVaccineExplosion && this.sceneManager && this.sceneManager.playSound) {
+            setTimeout(() => {
+                this.sceneManager.playSound('fail');
+            }, 1000); // Задержка 1 секунда
+        }
+
+        // Воспроизводим звук поражения от вакцины с задержкой
+        if (isVaccineExplosion && this.sceneManager && this.sceneManager.playSound) {
+            setTimeout(() => {
+                this.sceneManager.playSound('vaccine_injury');
+            }, 500); // Задержка 500мс
+        }
+
         // Скрываем кнопку паузы в начале падения и блокируем её
         if (this.sceneManager && this.sceneManager.uiManager && this.sceneManager.uiManager.pauseButton) {
             console.log('Hiding pause button at start of falling');
@@ -141,13 +155,13 @@ export class RabbitAnimations {
 
         // Устанавливаем флаг game over в true
         this.rabbit.physics.gameOver = true;
-        
+
         // Сбрасываем флаг первого запуска игры
         if (this.sceneManager) {
             this.sceneManager.isFirstGame = false;
             localStorage.setItem('isFirstGame', 'false');
         }
-        
+
         // Отключаем управление
         if (this.rabbit.controls) {
             this.rabbit.controls.disable();
@@ -214,7 +228,7 @@ export class RabbitAnimations {
                 this.rabbit.sprite.x = current.x + (next.x - current.x) * bounceFraction;
                 this.rabbit.sprite.y = newY;
                 this.rabbit.sprite.rotation = current.rotation + (next.rotation - current.rotation) * bounceFraction;
-                
+
                 // Убираем создание эффекта пыли при отскоке
                 // if (lastBounceY !== null && newY > lastBounceY && currentTime - lastBounceTime > 150) {
                 //     this.dustAnimation.createDustEffect(
@@ -316,7 +330,7 @@ export class RabbitAnimations {
             if (this.sceneManager) {
                 this.sceneManager.removeStartSign();
             }
-            
+
             window.location.reload();
         });
     }
