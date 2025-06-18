@@ -59,6 +59,10 @@ export class UIManager {
         });
 
         pauseButton.on('pointerdown', () => {
+            // Отмечаем взаимодействие пользователя
+            if (this.sceneManager && this.sceneManager.markUserInteraction) {
+                this.sceneManager.markUserInteraction();
+            }
             this.togglePause();
         });
 
@@ -107,6 +111,11 @@ export class UIManager {
 
         // Add click handler to toggle sound button texture
         soundButton.on('pointerdown', () => {
+            // Отмечаем взаимодействие пользователя
+            if (this.sceneManager && this.sceneManager.markUserInteraction) {
+                this.sceneManager.markUserInteraction();
+            }
+            
             // Переключаем звук через AudioManager
             if (this.sceneManager && this.sceneManager.audioManager) {
                 const isSoundOn = this.sceneManager.audioManager.toggleSound();

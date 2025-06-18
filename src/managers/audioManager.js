@@ -4,6 +4,7 @@ export class AudioManager {
         this.volume = 0.5;
         this.backgroundMusic = null;
         this.backgroundMusicVolume = 0.3; // Приглушенная громкость для фоновой музыки
+        this.hasUserInteracted = false; // Флаг первого взаимодействия пользователя
         
         // Загружаем состояние звука из localStorage
         const savedSoundState = localStorage.getItem('soundEnabled');
@@ -35,6 +36,15 @@ export class AudioManager {
         this.backgroundMusic.preload = 'auto';
     }
 
+    // Метод для отметки первого взаимодействия пользователя
+    markUserInteraction() {
+        if (!this.hasUserInteracted) {
+            this.hasUserInteracted = true;
+            // Запускаем фоновую музыку при первом взаимодействии
+            this.startBackgroundMusic();
+        }
+    }
+
     loadSound(name, src) {
         const audio = new Audio();
         audio.src = src;
@@ -45,6 +55,9 @@ export class AudioManager {
     }
 
     playSound(name) {
+        // Отмечаем взаимодействие пользователя при любом звуке
+        this.markUserInteraction();
+        
         if (!this.isSoundEnabled || !this.sounds[name]) {
             return null;
         }
@@ -64,7 +77,7 @@ export class AudioManager {
     }
 
     startBackgroundMusic() {
-        if (this.backgroundMusic && this.isSoundEnabled) {
+        if (this.backgroundMusic && this.isSoundEnabled && this.hasUserInteracted) {
             this.backgroundMusic.volume = this.backgroundMusicVolume;
             this.backgroundMusic.play().catch(error => {
                 console.warn('Ошибка воспроизведения фоновой музыки:', error);

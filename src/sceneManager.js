@@ -78,9 +78,6 @@ export class SceneManager {
         this.camera.minX = 0;
         this.camera.maxX = 10000; // Достаточно большое значение для бесконечной прокрутки
 
-        // Запускаем фоновую музыку
-        this.startBackgroundMusic();
-
         // Сначала отрисовываем сцену
         this.drawScene();
 
@@ -182,6 +179,13 @@ export class SceneManager {
     stopBackgroundMusic() {
         if (this.audioManager) {
             this.audioManager.stopBackgroundMusic();
+        }
+    }
+
+    // Метод для отметки взаимодействия пользователя
+    markUserInteraction() {
+        if (this.audioManager) {
+            this.audioManager.markUserInteraction();
         }
     }
 
