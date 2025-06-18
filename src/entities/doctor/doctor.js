@@ -8,17 +8,22 @@ export class Doctor {
         this.x = x;
         this.y = y;
         this.isActive = true;
-        this.animationSpeed = 20; // Увеличиваем с 0.1 до 0.3 для более медленной анимации
+        this.animationSpeed = 20;
         this.animationTime = 0;
         this.currentFrame = 0;
         this.frames = ['doctor_1.png', 'doctor_2.png', 'doctor_3.png'];
         this.isSmiling = false;
 
-        // Добавляем параметры для движения
-        this.speed = 0.3;
-        this.direction = -1; // Начинаем движение влево
+        // Случайные параметры для движения
+        this.speed = 0.2 + Math.random() * 0.4; // Скорость от 0.2 до 0.6
+        this.direction = Math.random() > 0.5 ? 1 : -1; // Случайное начальное направление
         this.startX = x;
-        this.walkDistance = 100; // Расстояние, которое доктор проходит в одну сторону
+        
+        // Случайная зона патрулирования
+        this.walkDistance = 80 + Math.random() * 120; // От 80 до 200 пикселей
+        
+        // Случайные изменения направления
+        this.directionChangeChance = 0.001; // 0.1% шанс смены направления
 
         this.sceneManager = sceneManager;
 
@@ -57,14 +62,23 @@ export class Doctor {
                 this.sprite.texture = this.resources.textures[this.frames[this.currentFrame]];
             }
 
+            // Случайная смена направления
+            if (Math.random() < this.directionChangeChance) {
+                this.direction *= -1;
+                this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
+            }
+
             // Обновляем движение
             this.sprite.x += this.speed * this.direction * delta;
 
-            // Проверяем, не вышел ли доктор за пределы своей зоны патрулирования
+            // Проверяем границы патрулирования
             if (Math.abs(this.sprite.x - this.startX) >= this.walkDistance) {
                 this.direction *= -1; // Разворачиваемся
-                // Обновляем отражение спрайта в зависимости от нового направления
                 this.sprite.scale.x = this.direction === -1 ? Math.abs(this.sprite.scale.x) : -Math.abs(this.sprite.scale.x);
+                
+                // Случайно изменяем зону патрулирования
+                this.walkDistance = 80 + Math.random() * 120;
+                this.startX = this.sprite.x; // Новая центральная точка
             }
         }
 

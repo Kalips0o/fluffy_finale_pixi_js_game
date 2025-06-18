@@ -99,7 +99,28 @@ export class VirusManager {
     update(delta) {
         // Спавним новые вирусы только если игра не окончена
         if (!this.sceneManager.rabbit.physics.gameOver) {
-            this.spawnVirus();
+            const rabbit = this.sceneManager.rabbit;
+            const isRabbitMoving = rabbit.isMoving && !rabbit.physics.gameOver;
+            const maxViruses = 25;
+            if (this.viruses.length < maxViruses) {
+                // Если кролик двигается — спавним как обычно
+                if (isRabbitMoving) {
+                    this.spawnVirus();
+                    this._rabbitStillTime = 0;
+                } else {
+                    // Если кролик стоит — увеличиваем таймер
+                    if (!this._rabbitStillTime) this._rabbitStillTime = 0;
+                    this._rabbitStillTime += delta * 16.666; // миллисекунды
+                    // Если кролик стоит дольше 10 секунд — спавним вирусы редко
+                    if (this._rabbitStillTime > 10000) {
+                        if (!this._lastStillVirusTime) this._lastStillVirusTime = 0;
+                        if (Date.now() - this._lastStillVirusTime > 10000) {
+                            this.spawnVirus();
+                            this._lastStillVirusTime = Date.now();
+                        }
+                    }
+                }
+            }
         }
         
         // Обновляем существующие вирусы (они продолжают двигаться даже при gameOver)
