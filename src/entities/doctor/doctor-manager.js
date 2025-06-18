@@ -80,6 +80,12 @@ export class DoctorManager {
             // Проверяем столкновение с кроликом только если доктор активен
             if (doctor.isActive) {
                 const rabbit = this.sceneManager.rabbit;
+                
+                // Игнорируем столкновения, если кролик уже падает
+                if (rabbit.physics.gameOver) {
+                    return doctor.isActive;
+                }
+                
                 const doctorHitbox = doctor.hitbox;
                 
                 // Проверяем столкновение при ударе
@@ -136,6 +142,11 @@ export class DoctorManager {
 
     handleCollision(doctor) {
         const rabbit = this.sceneManager.rabbit;
+        
+        // Игнорируем столкновение, если кролик уже падает
+        if (rabbit.physics.gameOver) {
+            return;
+        }
         
         // If rabbit is hitting, deactivate the doctor and show blood splatter
         if (rabbit.physics.hitActive) {

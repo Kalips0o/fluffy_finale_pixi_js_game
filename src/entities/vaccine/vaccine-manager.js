@@ -106,6 +106,12 @@ export class VaccineManager {
             // Проверяем столкновение с кроликом
             if (vaccine.isActive) {
                 const rabbit = this.sceneManager.rabbit;
+                
+                // Игнорируем столкновения, если кролик уже падает
+                if (rabbit.physics.gameOver) {
+                    return true;
+                }
+                
                 const vaccineHitbox = vaccine.hitbox;
                 
                 // Проверяем столкновение при ударе
@@ -148,7 +154,7 @@ export class VaccineManager {
     }
 
     handleHitCollision(vaccine, rabbit) {
-        if (vaccine.isHit) return;
+        if (vaccine.isHit || rabbit.physics.gameOver) return;
         vaccine.isHit = true;
         vaccine.sprite.visible = false;
         
@@ -163,7 +169,7 @@ export class VaccineManager {
     }
 
     handleCollision(vaccine, rabbit) {
-        if (vaccine.isHit) return;
+        if (vaccine.isHit || rabbit.physics.gameOver) return;
         vaccine.isHit = true;
         vaccine.sprite.visible = false;
         
